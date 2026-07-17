@@ -1,0 +1,25 @@
+name: Check
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    name: Lint and Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # needed to use a recent version of yarn
+      - name: Enable corepack
+        run: corepack enable
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24 # current lts
+          cache: yarn
+          cache-dependency-path: yarn.lock
+      - name: Install
+        run: yarn install --immutable
+      - name: Lint
+        run: yarn run lint
+      - name: Check
+        run: yarn run check
