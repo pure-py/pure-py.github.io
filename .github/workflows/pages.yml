@@ -1,4 +1,4 @@
-name: pages
+name: Deploy to Pages
 
 on:
   push:
@@ -16,18 +16,22 @@ concurrency:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      # needed to use a recent version of yarn
+      - name: Enable corepack
+        run: corepack enable
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24 # current lts
           cache: yarn
           cache-dependency-path: yarn.lock
-      - name: Install and build
-        run: |
-          yarn install --frozen-lockfile
-          yarn build
+      - name: Install
+        run: yarn install --immutable
+      - name: Build
+        run: yarn build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build
