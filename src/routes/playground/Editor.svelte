@@ -20,7 +20,17 @@
 
     const view = new EditorView({
       doc: value,
-      extensions: [basicSetup, oneDark, python()],
+      extensions: [
+        basicSetup,
+        oneDark,
+        EditorView.theme({
+          "&": {
+            height: "100%",
+            fontSize: "14px",
+          },
+        }),
+        python(),
+      ],
       parent: element,
 
       dispatchTransactions: (txs, view) => {
@@ -33,7 +43,7 @@
   });
 </script>
 
-<div id="editor" bind:this={element}>
+<div class="h-full w-full" id="editor" bind:this={element}>
   {#if loading}
     Loading...
   {/if}

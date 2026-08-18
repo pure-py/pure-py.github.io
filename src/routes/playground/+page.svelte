@@ -5,6 +5,9 @@
   import { Stdout } from "./stdout.svelte";
   import { onMount } from "svelte";
 
+  let terminalHeight = $state<number>(undefined);
+  let totalHeight = $state<number>(undefined);
+
   let stdout = new Stdout();
   let purepy: PurePy | undefined = undefined;
 
@@ -51,32 +54,75 @@
     }
   };
 
+  const onmousedown = () => {
+    const mousemove = (e) => {
+      terminalHeight = innerHeight - e.clientY - 2;
+    };
+
+    const mouseup = () => {
+      window.removeEventListener("mouseup", mouseup);
+      window.removeEventListener("mousemove", mousemove);
+    };
+
+    window.addEventListener("mouseup", mouseup);
+    window.addEventListener("mousemove", mousemove);
+  };
+
   const onupdate = (update: string) => {
     src_unsaved = update;
   };
 </script>
 
-<svelte:window {onkeydown} />
+<svelte:window {onkeydown} bind:innerHeight={totalHeight} />
 
-<div style="height: 100%; width: 100%; display: flex">
-  <div style="width: 100%">
+<div
+  class="w-full h-dvh max-h-screen flex flex-col justify-between bg-zinc-900 overflow-clip"
+>
+  <div>
+    <button
+      type="button"
+      class="inline-flex items-baseline gap-x-1.5 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-zinc-700"
+    >
+      Check
+    </button>
+
+    <button
+      type="button"
+      class="inline-flex items-baseline gap-x-1.5 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-zinc-700"
+    >
+      Run
+      <div class=" border-gray-500 border px-1 rounded-sm text-xs font-normal">
+        ⌘+S
+      </div>
+    </button>
+  </div>
+
+  <div class="h-full w-full bg-red-100">
     <CodeMirror value={example_py} {onupdate} />
   </div>
-  <div style="width: 100%">
-    <div style="height:100%; width:100%; font-family: monospace; padding: 8px;">
-      {#each $state.eager(stdout.lines) as line, index (index)}
-        <p
-          style="white-space: pre; margin: 0; color: {line.is_err
-            ? 'red'
-            : 'black'}"
-        >
-          {line.content}
-        </p>
-      {/each}
+
+  <div class="">
+    <div
+      {onmousedown}
+      class="h-4 border-white border-t w-full m-auto cursor-row-resize hover:bg-zinc-800"
+    ></div>
+
+    <div
+      bind:clientHeight={terminalHeight}
+      class="w-full h-full min-h-24 overflow-scroll"
+      style="height: {terminalHeight}px"
+    >
+      <div class="h-full w-full font-mono p-2">
+        {#each $state.eager(stdout.lines) as line, index (index)}
+          <p
+            class="whitespace-pre m-0 {line.is_err
+              ? 'text-red-500'
+              : 'text-white'}"
+          >
+            {line.content}
+          </p>
+        {/each}
+      </div>
     </div>
-    {#if is_ready && !is_running}
-      <button onclick={save_and_run} disabled={is_running}>Run</button>
-    {/if}
-    <button onclick={stdout.clear}>Clear</button>
   </div>
 </div>
