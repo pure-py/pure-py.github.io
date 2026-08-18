@@ -9,21 +9,18 @@
   let loading = $state(true);
 
   onMount(async () => {
-    const [{ basicSetup }, { EditorView }, { python }] = await Promise.all([
-      import("codemirror"),
-      import("@codemirror/view"),
-      import("@codemirror/lang-python"),
-    ]);
+    const [{ basicSetup, EditorView }, { python }, { oneDark }] =
+      await Promise.all([
+        import("codemirror"),
+        import("@codemirror/lang-python"),
+        import("@codemirror/theme-one-dark"),
+      ]);
 
     loading = false;
 
-    const theme = EditorView.baseTheme({
-      "&": { height: "100%", "max-height": "100%", width: "100%" },
-    });
-
     const view = new EditorView({
       doc: value,
-      extensions: [basicSetup, theme, python()],
+      extensions: [basicSetup, oneDark, python()],
       parent: element,
 
       dispatchTransactions: (txs, view) => {
