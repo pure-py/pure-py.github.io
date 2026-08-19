@@ -93,11 +93,6 @@ export class PurePy {
   };
 
   evaluate = (src: string) => {
-    const check_result = this.parse_and_check(src);
-    if (!check_result.success) {
-      return check_result;
-    }
-
     const result = this.run(src);
     return { success: true, output: result } as const;
   };

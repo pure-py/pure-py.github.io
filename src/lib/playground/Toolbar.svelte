@@ -3,7 +3,7 @@
   import ToolbarButton from "./components/ToolbarButton.svelte";
   import ToolbarLink from "./components/ToolbarLink.svelte";
 
-  let { check, run, is_running } = $props();
+  let { check, run, is_busy } = $props();
 </script>
 
 <div class="flex h-10">
@@ -25,8 +25,8 @@
   >
 
   <span class="ml-auto"></span>
-  <ToolbarButton onclick={check} busy={is_running}>Check</ToolbarButton>
-  <ToolbarButton onclick={run} busy={is_running}>
+  <ToolbarButton onclick={check} busy={is_busy}>Check</ToolbarButton>
+  <ToolbarButton onclick={run} busy={is_busy}>
     Run
     <Kbd>⌘S</Kbd>
   </ToolbarButton>

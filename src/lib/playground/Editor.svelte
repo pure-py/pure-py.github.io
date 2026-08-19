@@ -2,9 +2,13 @@
   import type { EditorView } from "codemirror";
   import { onMount } from "svelte";
 
-  type Props = { value: string; onupdate: (value: string) => void };
+  type Props = {
+    value: string;
+    onupdate: (value: string) => void;
+    onload: () => void;
+  };
 
-  let { value, onupdate }: Props = $props();
+  let { value, onupdate, onload }: Props = $props();
 
   let element: HTMLDivElement;
   let view: EditorView | undefined;
@@ -41,6 +45,8 @@
         onupdate(view.state.doc.toString());
       },
     });
+
+    onload();
   };
 
   onMount(() => {

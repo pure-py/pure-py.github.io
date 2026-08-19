@@ -10,15 +10,17 @@
   //
   // TODO: check mobile. there is a touchdown or similar event. pointer down might
   // be more approrpriate and cover both.
-  const onmousedown = (_: MouseEvent) => {
+  //
+  const onmousedown = () => {
     const onmousemove = ({ clientY }: MouseEvent) => {
       if (availableHeight === undefined) {
         return;
       }
 
       // the height of the window, offset by the mouse y position,
-      // minus the height of this dragger element itself
-      const proposedHeight = availableHeight - clientY - 16;
+      // minus the height of this dragger element itself, minus
+      // the statusbar height
+      const proposedHeight = availableHeight - clientY - 16 - 24;
 
       // these aren't strictly necessary, but it will make it easier
       // to not break anything here
@@ -33,7 +35,7 @@
       setHeight(boundedHeight);
     };
 
-    const onmouseup = (_: MouseEvent) => {
+    const onmouseup = () => {
       window.removeEventListener("mouseup", onmouseup);
       window.removeEventListener("mousemove", onmousemove);
     };
