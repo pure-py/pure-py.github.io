@@ -122,7 +122,9 @@
       // if the program ends in a value expression, we get that
       // value here (otherwise undefined)
       const result = output === undefined ? "<no result>" : output;
-      stdout.write(`${result}`);
+      // TODO: figure out the possible, sensible output types and handle them properly,
+      // in the meantime at least avoid [object Object]
+      stdout.write(typeof result === 'object' ? JSON.stringify(result) : `${result}`);
 
       stdout.write("---");
     });
