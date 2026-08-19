@@ -124,7 +124,9 @@
       const result = output === undefined ? "<no result>" : output;
       // TODO: figure out the possible, sensible output types and handle them properly,
       // in the meantime at least avoid [object Object]
-      stdout.write(typeof result === 'object' ? JSON.stringify(result) : `${result}`);
+      stdout.write(
+        typeof result === "object" ? JSON.stringify(result) : `${result}`,
+      );
 
       stdout.write("---");
     });
