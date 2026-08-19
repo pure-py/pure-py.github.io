@@ -76,7 +76,7 @@ export class PurePy {
       `),
     );
 
-  evaluate = (src: string) => {
+  parse_and_check = (src: string) => {
     const path = this.write_file("whatever.purepy", src);
 
     const parse_result = this.parse(path);
@@ -85,6 +85,15 @@ export class PurePy {
     }
 
     const check_result = this.check(path);
+    if (!check_result.success) {
+      return check_result;
+    }
+
+    return { success: true, error: null } as const;
+  };
+
+  evaluate = (src: string) => {
+    const check_result = this.parse_and_check(src);
     if (!check_result.success) {
       return check_result;
     }

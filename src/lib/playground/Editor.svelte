@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { EditorView } from "codemirror";
   import { onMount } from "svelte";
 
   type Props = { value: string; onupdate: (value: string) => void };
@@ -6,9 +7,11 @@
   let { value, onupdate }: Props = $props();
 
   let element: HTMLDivElement;
+  let view: EditorView | undefined;
+
   let loading = $state(true);
 
-  onMount(async () => {
+  const setup = async () => {
     const [{ basicSetup, EditorView }, { python }, { oneDark }] =
       await Promise.all([
         import("codemirror"),
@@ -18,7 +21,7 @@
 
     loading = false;
 
-    const view = new EditorView({
+    view = new EditorView({
       doc: value,
       extensions: [
         basicSetup,
@@ -38,8 +41,13 @@
         onupdate(view.state.doc.toString());
       },
     });
+  };
 
-    return () => view?.destroy();
+  onMount(() => {
+    setup();
+    return () => {
+      view?.destroy();
+    };
   });
 </script>
 
