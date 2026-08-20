@@ -1,4 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
@@ -28,5 +29,5 @@ export function viteStaticCopyPyodide() {
 
 export default defineConfig({
   optimizeDeps: { exclude: ["pyodide"] },
-  plugins: [sveltekit(), viteStaticCopyPyodide()],
+  plugins: [tailwindcss(), sveltekit(), viteStaticCopyPyodide()],
 });

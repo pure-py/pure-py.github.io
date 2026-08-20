@@ -8,7 +8,7 @@ import reasons_py from "$lib/assets/reasons.py?raw";
 import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 
-const ParseError = z.object({
+const PurePyError = z.object({
   msg: z.string(),
   line: z.optional(z.number()),
   col: z.optional(z.number()),
@@ -22,7 +22,7 @@ const capture_err = (fn: () => unknown) => {
     return { success: true } as const;
   }
 
-  const error = ParseError.parse(result);
+  const error = PurePyError.parse(result);
 
   return { success: false, error } as const;
 };
@@ -55,15 +55,32 @@ export class PurePy {
   };
 
   run = (src: string) => {
-    const result: unknown = this.pyodide.runPython(src);
-    return result;
+    try {
+      const result: unknown = this.pyodide.runPython(src);
+      return result;
+    } catch (error) {
+      // something went wrong in Python/Pyodide
+      console.error(error);
+      return {
+        msg: "Unhandled exception (see console)",
+      };
+    }
   };
 
   parse = (path: string) =>
     capture_err(() =>
       this.run(`
         import parse
-        parse.check_file("${path}")
+        def fn():
+          try:
+            parse.check_file("${path}")
+          except SyntaxError as err:
+            return {
+              "msg": "Syntax error",
+              "line": err.lineno,
+              "col": err.offset
+            }
+        fn()
       `),
     );
 
@@ -76,7 +93,7 @@ export class PurePy {
       `),
     );
 
-  evaluate = (src: string) => {
+  parse_and_check = (src: string) => {
     const path = this.write_file("whatever.purepy", src);
 
     const parse_result = this.parse(path);
@@ -89,6 +106,10 @@ export class PurePy {
       return check_result;
     }
 
+    return { success: true, error: null } as const;
+  };
+
+  evaluate = (src: string) => {
     const result = this.run(src);
     return { success: true, output: result } as const;
   };
