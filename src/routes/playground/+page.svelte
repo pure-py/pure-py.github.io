@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import example_py from "$lib/assets/examples/example.py?raw";
   import CodeMirror from "$lib/playground/Editor.svelte";
   import { PurePy } from "$lib/playground/lib/purepy";
   import { Stdout } from "$lib/playground/lib/stdout.svelte";
@@ -10,18 +9,23 @@
   import Toolbar from "$lib/playground/Toolbar.svelte";
   import { onMount } from "svelte";
   import { page } from "$app/state";
-  import { url_with_params_from_src } from "$lib/playground/lib/share";
+  import {
+    params_from_url,
+    src_from_params,
+    url_with_params_from_src,
+  } from "$lib/playground/lib/share";
 
   let terminalHeight: number | undefined = $state(undefined);
 
   let stdout = new Stdout();
   let purepy: PurePy | undefined = undefined;
+  let editor: CodeMirror;
 
   // TODO: once we are happy we have all the state we need,
   // we should simplify this!!
 
-  let src_saved = $state(example_py);
-  let src_unsaved = $state(example_py);
+  let src_saved = $state("");
+  let src_unsaved = $state("");
   let has_unsaved_changes = $derived(src_saved !== src_unsaved);
 
   let is_running_check = $state(false);
@@ -153,13 +157,35 @@
       stdout.write("---");
     });
 
-  onMount(async () => {
+  const setup_codemirror = async () => {
+    const state = params_from_url(page.url);
+    if (state === null) {
+      await editor.ready;
+    } else {
+      try {
+        const src = await src_from_params(state);
+        src_saved = src;
+        src_unsaved = src;
+        await editor.set_doc(src);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    is_codemirror_ready = true;
+  };
+
+  const setup_pyodide = async () => {
     stdout.write("Loading PurePy...");
     purepy = await PurePy.load();
     purepy.attach_stdout(stdout);
     is_pyodide_ready = true;
     stdout.write("Ready");
     stdout.write("Press Cmd/Ctrl + S or use the button below to run");
+  };
+
+  onMount(async () => {
+    await Promise.all([setup_codemirror(), setup_pyodide()]);
   });
 
   const onkeydown = (event: KeyboardEvent) => {
@@ -182,11 +208,7 @@
   </div>
 
   <div class="h-auto grow shrink">
-    <CodeMirror
-      onload={() => (is_codemirror_ready = true)}
-      value={example_py}
-      {onupdate}
-    />
+    <CodeMirror bind:this={editor} initial_value="" {onupdate} />
   </div>
 
   <div class="shrink-0 grow-0 flex flex-col">

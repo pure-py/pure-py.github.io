@@ -27,24 +27,28 @@ export const url_with_params_from_src = async (url: URL, src: string) => {
   return url;
 };
 
-export const get_src_from_url = async (url: URL) => {
+export const params_from_url = (url: URL) => {
   try {
     const version = url.searchParams.get("v");
     const compression = url.searchParams.get("c");
     const payload = url.searchParams.get("p");
 
-    if ([version, compression, payload].some((x) => x === null)) {
+    // if only some are null, this should cause a parse error (below)
+    if ([version, compression, payload].every((x) => x === null)) {
       return null;
     }
 
     const params = SharableStateParams.parse({ version, compression, payload });
 
-    const state = await params_to_state(params);
-
-    return state.files[0].data;
+    return params;
   } catch (error) {
-    // there are a few things which could go wrong here
+    // some visual feedback may be nice
     console.error(error);
     return null;
   }
+};
+
+export const src_from_params = async (params: SharableStateParams) => {
+  const state = await params_to_state(params);
+  return state.files[0].data;
 };
