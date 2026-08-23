@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import example_py from "$lib/assets/examples/example.py?raw";
   import CodeMirror from "$lib/playground/Editor.svelte";
   import { PurePy } from "$lib/playground/lib/purepy";
@@ -8,6 +9,8 @@
   import TerminalDragger from "$lib/playground/TerminalDragger.svelte";
   import Toolbar from "$lib/playground/Toolbar.svelte";
   import { onMount } from "svelte";
+  import { page } from "$app/state";
+  import { url_with_params_from_src } from "$lib/playground/lib/share";
 
   let terminalHeight: number | undefined = $state(undefined);
 
@@ -73,6 +76,25 @@
     } catch (error) {
       // TODO: see what errors might come out of Pyodide and if/how we should handle
       // them, in the meantime, don't crash the page
+      console.error(error);
+    } finally {
+      is_running = false;
+    }
+  };
+
+  const share = async () => {
+    is_running = true;
+    try {
+      save();
+      const url = await url_with_params_from_src(page.url, src_saved);
+
+      // update the url without reloading page
+      const update_url = goto(url);
+      // TODO: add visual feedback
+      const copy_to_clipboard = navigator.clipboard.writeText(url.toString());
+
+      await Promise.all([update_url, copy_to_clipboard]);
+    } catch (error) {
       console.error(error);
     } finally {
       is_running = false;
@@ -156,7 +178,7 @@
 
 <div class="w-full h-dvh max-h-screen flex flex-col bg-zinc-900 overflow-clip">
   <div class="shrink-0 grow-0">
-    <Toolbar {check} {run} {is_busy} />
+    <Toolbar {share} {check} {run} {is_busy} />
   </div>
 
   <div class="h-auto grow shrink">
