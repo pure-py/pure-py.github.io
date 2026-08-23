@@ -1,15 +1,7 @@
 <script lang="ts">
-  import type { File } from "../lib/app.svelte";
+  import type { State } from "../lib/app.svelte";
 
-  type Props = {
-    files: Readonly<File[]>;
-    active: number;
-    set_active: (file: number) => void;
-    add_file: (path: string) => Promise<void>;
-    remove_file: (index: number) => void;
-  };
-
-  let { active, files, set_active, add_file, remove_file }: Props = $props();
+  let { app }: { app: State } = $props();
 
   let new_file_prompt = $state(false);
   let new_file_name = $state("");
@@ -21,14 +13,14 @@
       return;
     }
 
-    add_file(new_file_name);
+    app.add_file(new_file_name);
     new_file_name = "";
   };
 </script>
 
 <div class="h-8 flex w-full">
-  {#each files as file, index (file.path)}
-    {#if active === index}
+  {#each app.files as file, index (file.path)}
+    {#if app.active_file_index === index}
       <div
         class="px-1.5 gap-2 flex justify-center items-center text-sm rounded-t-md bg-[#282c34] text-white border border-t-zinc-500 border-x-zinc-500 border-b-transparent"
       >
@@ -37,11 +29,11 @@
         </div>
 
         <div class="flex items-center justify-end gap-1 w-6">
-          {#if files.length > 1}
+          {#if app.files.length > 1}
             <button
               title="Delete file"
               class="cursor-pointer"
-              onclick={() => remove_file(index)}
+              onclick={() => app.remove_file(index)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -64,7 +56,7 @@
         tabindex="-1"
         onkeyup={() => {}}
         role="button"
-        onclick={() => set_active(index)}
+        onclick={() => app.set_active(index)}
         class="px-1.5 gap-2 flex justify-center items-center text-sm cursor-pointer rounded-t-md bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300 border border-t-transparent border-x-transparent border-b-zinc-500"
       >
         <div>

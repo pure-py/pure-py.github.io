@@ -54,6 +54,10 @@ export class PurePy {
     return path;
   };
 
+  delete_file = (path: string) => {
+    this.pyodide.FS.unlink(path);
+  };
+
   run = (src: string) => {
     try {
       const result: unknown = this.pyodide.runPython(src);
@@ -93,9 +97,7 @@ export class PurePy {
       `),
     );
 
-  parse_and_check = (src: string) => {
-    const path = this.write_file("whatever.purepy", src);
-
+  parse_and_check = (path: string) => {
     const parse_result = this.parse(path);
     if (!parse_result.success) {
       return parse_result;
