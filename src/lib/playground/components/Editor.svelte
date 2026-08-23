@@ -23,7 +23,9 @@
       // never
       return;
     }
-    const tx = view.state.update({ changes: { from: 0, insert: src } });
+    const tx = view.state.update({
+      changes: { from: 0, to: view.state.doc.length, insert: src },
+    });
     view.dispatch(tx);
   };
 
@@ -67,4 +69,8 @@
   });
 </script>
 
-<div class="h-full w-full" id="editor" bind:this={element}></div>
+<div
+  class="h-full w-full border-t-zinc-500"
+  id="editor"
+  bind:this={element}
+></div>

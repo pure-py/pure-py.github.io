@@ -1,6 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
+  import main_py from "$lib/assets/examples/example.py?raw";
+  import other_py from "$lib/assets/examples/other.py?raw";
   import CodeMirror from "$lib/playground/components/Editor.svelte";
   import StatusBar from "$lib/playground/components/StatusBar.svelte";
   import Terminal from "$lib/playground/components/Terminal.svelte";
@@ -14,6 +16,16 @@
   } from "$lib/playground/lib/share";
   import { Stdout } from "$lib/playground/lib/stdout.svelte";
   import { onMount } from "svelte";
+  import Tabs from "./components/Tabs.svelte";
+  import { File } from "./lib/app.svelte";
+
+  let files: File[] = $state([
+    new File("main.py", main_py),
+    new File("other.py", other_py),
+  ]);
+
+  let active = $state(0);
+  let active_file = $derived(files[active]);
 
   let terminalHeight: number | undefined = $state(undefined);
 
@@ -23,10 +35,6 @@
 
   // TODO: once we are happy we have all the state we need,
   // we should simplify this!!
-
-  let src_saved = $state("");
-  let src_unsaved = $state("");
-  let has_unsaved_changes = $derived(src_saved !== src_unsaved);
 
   let is_running_check = $state(false);
   let is_running_evaluate = $state(false);
@@ -45,7 +53,7 @@
   let eval_time = $state(0);
 
   const status = $derived({
-    has_unsaved_changes,
+    has_unsaved_changes: active_file.dirty,
     check_success,
     eval_success,
     is_running_check,
@@ -57,11 +65,13 @@
   });
 
   const save = () => {
-    if (!has_unsaved_changes) {
+    if (!active_file.dirty) {
       // nothing to do...
       return;
     }
-    src_saved = src_unsaved;
+
+    active_file.save();
+
     check_success = null;
     eval_success = null;
   };
@@ -90,7 +100,10 @@
     is_running = true;
     try {
       save();
-      const url = await url_with_params_from_src(page.url, src_saved);
+      const url = await url_with_params_from_src(
+        page.url,
+        active_file.get_data(),
+      );
 
       // update the url without reloading page
       const update_url = goto(url);
@@ -108,7 +121,7 @@
   // don't use this unless you are inside a `statefully` already
   const _check_saved = (purepy: PurePy) => {
     const start_t = Date.now();
-    const { success, error } = purepy.parse_and_check(src_saved);
+    const { success, error } = purepy.parse_and_check(active_file.get_data());
     check_time = Date.now() - start_t;
     check_success = success;
     if (!success) {
@@ -139,7 +152,7 @@
       // TODO: this is always successful, but surely not,
       // we should catch runtime errors!
       const start_t = Date.now();
-      const { success, output } = purepy.evaluate(src_saved);
+      const { success, output } = purepy.evaluate(active_file.get_data());
       eval_time = Date.now() - start_t;
       eval_success = success;
 
@@ -157,15 +170,41 @@
       stdout.write("---");
     });
 
+  const set_active = async (index: number) => {
+    active = index;
+    await editor.set_doc(active_file.get_data());
+  };
+
+  const add_file = async (path: string) => {
+    files.push(new File(path));
+    active = files.length - 1;
+
+    await editor.set_doc("");
+  };
+
+  const remove_file = (index: number) => {
+    if (files.length === 1) {
+      // never
+      return;
+    }
+
+    if (index === files.length - 1) {
+      active = index - 1;
+    }
+
+    files.splice(index, 1);
+    editor.set_doc(active_file.get_data());
+  };
+
   const setup_codemirror = async () => {
     const state = params_from_url(page.url);
     if (state === null) {
-      await editor.ready;
+      await editor.set_doc(active_file.get_buffer());
     } else {
       try {
         const src = await src_from_params(state);
-        src_saved = src;
-        src_unsaved = src;
+        active_file.set_buffer(src);
+        active_file.save();
         await editor.set_doc(src);
       } catch (error) {
         console.error(error);
@@ -196,15 +235,16 @@
   };
 
   const onupdate = (update: string) => {
-    src_unsaved = update;
+    active_file.set_buffer(update);
   };
 </script>
 
 <svelte:window {onkeydown} />
 
 <div class="w-full h-dvh max-h-screen flex flex-col bg-zinc-900 overflow-clip">
-  <div class="shrink-0 grow-0">
+  <div class="shrink-0 grow-0 flex flex-col">
     <Toolbar {share} {check} {run} {is_busy} />
+    <Tabs {active} {files} {set_active} {add_file} {remove_file} />
   </div>
 
   <div class="h-auto grow shrink">
