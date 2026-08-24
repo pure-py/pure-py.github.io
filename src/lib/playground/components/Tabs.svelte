@@ -22,13 +22,19 @@
   {#each app.files as file, index (file.path)}
     {#if app.active_file_index === index}
       <div
-        class="px-1.5 gap-2 flex justify-center items-center text-sm rounded-t-md bg-[#282c34] text-white border border-t-zinc-500 border-x-zinc-500 border-b-transparent"
+        class="px-1.5 gap-2 flex items-center text-sm rounded-t-md bg-[#282c34] text-white border border-t-zinc-500 border-x-zinc-500 border-b-transparent"
       >
-        <div>
+        <div class="inline-flex items-baseline gap-x-1.5 pb-0.5">
+          <div class="size-2">
+            {#if file.dirty}
+              <div class="size-full rounded-full bg-white"></div>
+            {/if}
+          </div>
+
           {file.path}
         </div>
 
-        <div class="flex items-center justify-end gap-1 w-6">
+        <div class="flex justify-end w-6">
           {#if app.files.length > 1}
             <button
               title="Delete file"
@@ -59,11 +65,17 @@
         onclick={() => app.open_file(index)}
         class="px-1.5 gap-2 flex justify-center items-center text-sm cursor-pointer rounded-t-md bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300 border border-t-transparent border-x-transparent border-b-zinc-500"
       >
-        <div>
+        <div class="inline-flex items-baseline gap-x-1.5 pb-0.5">
+          <div class="size-2">
+            {#if file.dirty}
+              <div class="size-full rounded-full bg-white"></div>
+            {/if}
+          </div>
+
           {file.path}
         </div>
 
-        <div class="flex items-center justify-end gap-1 w-6"></div>
+        <div class="flex items-center justify-end w-6"></div>
       </div>
     {/if}
   {/each}
