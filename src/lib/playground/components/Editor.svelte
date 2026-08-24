@@ -22,7 +22,7 @@
       ]);
 
     const _view = new EditorView({
-      doc: app.active_file.get_buffer(),
+      doc: app.active_file.buffer,
       extensions: [
         basicSetup,
         oneDark,
@@ -38,7 +38,7 @@
 
       dispatchTransactions: (txs, view) => {
         view.update(txs);
-        app.active_file.set_buffer(view.state.doc.toString());
+        app.write_open_file(view.state.doc.toString());
       },
     });
 

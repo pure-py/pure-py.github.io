@@ -13,7 +13,7 @@
       return;
     }
 
-    app.add_file(new_file_name);
+    app.new_file(new_file_name);
     new_file_name = "";
   };
 </script>
@@ -33,7 +33,7 @@
             <button
               title="Delete file"
               class="cursor-pointer"
-              onclick={() => app.remove_file(index)}
+              onclick={() => app.delete_open_file()}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,7 @@
         tabindex="-1"
         onkeyup={() => {}}
         role="button"
-        onclick={() => app.set_active(index)}
+        onclick={() => app.open_file(index)}
         class="px-1.5 gap-2 flex justify-center items-center text-sm cursor-pointer rounded-t-md bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300 border border-t-transparent border-x-transparent border-b-zinc-500"
       >
         <div>

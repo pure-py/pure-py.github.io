@@ -43,9 +43,7 @@
       // nothing to do...
       return;
     }
-
-    app.active_file.save();
-
+    app.save_open_file();
     check_success = null;
     eval_success = null;
   };
@@ -55,7 +53,7 @@
       save();
       const url = await url_with_params_from_src(
         page.url,
-        app.active_file.get_data(),
+        app.active_file.data,
       );
       // update the url without reloading page
       const update_url = goto(url);
@@ -71,9 +69,7 @@
   // don't use this unless you are inside a `statefully` already
   const _check_saved = (purepy: PurePy) => {
     const start_t = Date.now();
-    const { success, error } = purepy.parse_and_check(
-      app.active_file.get_data(),
-    );
+    const { success, error } = purepy.parse_and_check(app.active_file);
     check_time = Date.now() - start_t;
     check_success = success;
     if (!success) {
@@ -104,7 +100,7 @@
       // TODO: this is always successful, but surely not,
       // we should catch runtime errors!
       const start_t = Date.now();
-      const { success, output } = purepy.evaluate(app.active_file.get_data());
+      const { success, output } = purepy.evaluate(app.active_file);
       eval_time = Date.now() - start_t;
       eval_success = success;
 

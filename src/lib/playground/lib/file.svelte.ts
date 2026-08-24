@@ -1,32 +1,49 @@
-export class File {
+export type StaticFile = {
   readonly path: string;
-  private data: string;
-  private buffer: string;
-  readonly dirty: boolean;
+  readonly data: string;
+};
 
-  constructor(path: string, data?: string) {
-    this.path = $state(path);
-    this.data = $state(data ?? "");
-    this.buffer = $state(data ?? "");
-    this.dirty = $derived(this.data !== this.buffer);
+export type ReadonlyFile = {
+  readonly path: string;
+  readonly data: string;
+  readonly buffer: string;
+  readonly dirty: boolean;
+};
+
+export class _File {
+  private _dirty = false;
+  private _data: string;
+  private _buffer: string;
+
+  readonly meta: ReadonlyFile;
+
+  constructor(path: string, data: string) {
+    this._data = $state(data);
+    this._buffer = $state(data);
+
+    this.meta = $derived({
+      path,
+      data: this._data,
+      buffer: this._buffer,
+      dirty: this._dirty,
+    });
   }
 
   save = () => {
-    if (!this.dirty) {
-      return;
-    }
-    this.data = this.buffer;
+    this._data = this._buffer;
+    this._dirty = false;
   };
 
   get_data = () => {
-    return this.data;
+    return this._data;
   };
 
   get_buffer = () => {
-    return this.buffer;
+    return this._buffer;
   };
 
   set_buffer = (data: string) => {
-    this.buffer = data;
+    this._buffer = data;
+    this._dirty = this._buffer === this._data;
   };
 }
