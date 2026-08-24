@@ -1,10 +1,14 @@
 <script lang="ts">
   import StatusItem from "$lib/playground/components/statusbar/StatusItem.svelte";
-  import type { Status } from "$lib/playground/lib/state";
+  import type { Result } from "../lib/app.svelte";
 
-  type Props = { status: Status };
+  type Props = {
+    dirty: boolean;
+    check_result: Result | null;
+    eval_result: Result | null;
+  };
 
-  let { status }: Props = $props();
+  let { dirty, check_result, eval_result }: Props = $props();
 </script>
 
 <div
@@ -12,7 +16,7 @@
 >
   <div>
     <p>
-      {#if status.has_unsaved_changes}
+      {#if dirty}
         Unsaved changes
       {:else}
         Up to date
@@ -21,15 +25,7 @@
   </div>
 
   <div class="flex gap-2">
-    <StatusItem
-      type="Evaluate"
-      success={status.eval_success}
-      time={status.eval_time}
-    />
-    <StatusItem
-      type="Check"
-      success={status.check_success}
-      time={status.check_time}
-    />
+    <StatusItem type="Evaluate" result={eval_result} />
+    <StatusItem type="Check" result={check_result} />
   </div>
 </div>

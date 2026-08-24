@@ -3,9 +3,15 @@ import other_py from "$lib/assets/examples/other.py?raw";
 import type { PurePy } from "./purepy";
 import { _File, type StaticFile, type ReadonlyFile } from "./file.svelte";
 import { nonempty_map, type NonEmpty } from "$lib/utils/non-empty";
+import type { Stdout } from "./stdout.svelte";
 
 type Editor = {
   set_doc: (str: string) => void;
+};
+
+export type Result = {
+  success: boolean;
+  time: number;
 };
 
 export class State {
@@ -18,14 +24,18 @@ export class State {
   readonly active_file_index: number;
   readonly active_file: ReadonlyFile;
 
-  // we get these later
+  // these are currently initialised elsewhere and not directly managed here
   editor: Editor | null = null;
   purepy: PurePy | null = null;
+  stdout: Stdout | null = null;
 
   // state things
   readonly dirty: boolean;
   private _busy: boolean;
   readonly busy: boolean;
+
+  check_result: Result | null;
+  eval_result: Result | null;
 
   constructor(files: NonEmpty<StaticFile>) {
     this._files = $state(nonempty_map(files, (f) => new _File(f.path, f.data)));
@@ -39,6 +49,9 @@ export class State {
     this.dirty = $derived(this.files.some((file) => file.dirty));
     this._busy = $state(true);
     this.busy = $derived(this._busy);
+
+    this.check_result = $state(null);
+    this.eval_result = $state(null);
   }
 
   static default = () => {
@@ -82,6 +95,9 @@ export class State {
       this._active_file.meta.path,
       this._active_file.meta.data,
     );
+
+    this.check_result = null;
+    this.eval_result = null;
   };
 
   write_open_file = (data: string) => {
@@ -124,7 +140,11 @@ export class State {
     }
   };
 
-  statefully = (fn: (purepy: PurePy) => void) => {
+  register_stdout = (stdout: Stdout) => {
+    this.stdout = stdout;
+  };
+
+  private statefully = (fn: (purepy: PurePy) => void) => {
     if (this.busy || this.purepy === null) {
       // never?
       return;
@@ -139,7 +159,60 @@ export class State {
     }
   };
 
-  private _check = () => {};
+  private _check = (purepy: PurePy) => {
+    const start = Date.now();
+    const { success, error } = purepy.parse_and_check(this.active_file);
+    const time = Date.now() - start;
+    if (!success) {
+      this.stdout?.write_err(error.msg);
+    }
+    this.check_result = {
+      success,
+      time,
+    };
+    return success;
+  };
 
-  check = () => {};
+  save_and_check = () =>
+    this.statefully((purepy) => {
+      this.save_open_file();
+      const success = this._check(purepy);
+      if (success) {
+        this.stdout?.write("Check ok!");
+      } else {
+        this.stdout?.write_err("Check failed!");
+      }
+    });
+
+  save_and_run = () =>
+    this.statefully((purepy) => {
+      this.save_open_file();
+      const check_success = this._check(purepy);
+      if (!check_success) {
+        this.stdout?.write_err("Check failed, running anyway...");
+      }
+
+      this.stdout?.write("--- stdout ---");
+
+      const start = Date.now();
+      const { success, output } = purepy.evaluate(this.active_file);
+      const time = Date.now() - start;
+      this.eval_result = {
+        success,
+        time,
+      };
+
+      this.stdout?.write("--- result ---");
+
+      // if the program ends in a value expression, we get that
+      // value here (otherwise undefined)
+      const result = output === undefined ? "<no result>" : output;
+      // TODO: figure out the possible, sensible output types and handle them properly,
+      // in the meantime at least avoid [object Object]
+      this.stdout?.write(
+        typeof result === "object" ? JSON.stringify(result) : `${result}`,
+      );
+
+      this.stdout?.write("---");
+    });
 }
