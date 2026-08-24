@@ -44,6 +44,6 @@ export class _File {
 
   set_buffer = (data: string) => {
     this._buffer = data;
-    this._dirty = this._buffer === this._data;
+    this._dirty = this._buffer !== this._data;
   };
 }
