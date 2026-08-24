@@ -7,7 +7,7 @@
   import TerminalDragger from "$lib/playground/components/TerminalDragger.svelte";
   import Toolbar from "$lib/playground/components/Toolbar.svelte";
   import { PurePy } from "$lib/playground/lib/purepy";
-  import { url_with_params_from_files } from "$lib/playground/lib/share";
+  import { url_with_params_from_state } from "$lib/playground/lib/share";
   import { Stdout } from "$lib/playground/lib/stdout.svelte";
   import { onMount } from "svelte";
   import Tabs from "./components/Tabs.svelte";
@@ -23,8 +23,8 @@
 
   const share = async () => {
     try {
-      app.save_all();
-      const url = await url_with_params_from_files(page.url, app.files);
+      const state = app.share_state();
+      const url = await url_with_params_from_state(page.url, state);
       // update the url without reloading page
       const update_url = goto(url);
       // TODO: add visual feedback

@@ -1,26 +1,17 @@
 // these are mostly convenience functions and subject to change
 
-import type { NonEmpty } from "$lib/utils/non-empty";
-import type { StaticFile } from "./file.svelte";
 import {
-  decode_state,
   encode_state,
   get_encoded_state,
   set_encoded_state,
   SharableState,
-  type EncodedState,
 } from "./share/codec";
 
-export const url_with_params_from_files = async (
+export const url_with_params_from_state = async (
   url: URL,
-  files: NonEmpty<StaticFile>,
+  state: SharableState,
 ) => {
   url = new URL(url);
-
-  const state: SharableState = {
-    files,
-  };
-
   const encoded = await encode_state(state);
   const new_url = set_encoded_state(url, encoded);
   return new_url;
@@ -35,9 +26,4 @@ export const params_from_url = (url: URL) => {
     console.error(error);
     return null;
   }
-};
-
-export const files_from_params = async (params: EncodedState) => {
-  const state = await decode_state(params.version, params.payload);
-  return state.files;
 };

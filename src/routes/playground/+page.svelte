@@ -2,10 +2,8 @@
   import { page } from "$app/state";
   import Playground from "$lib/playground/App.svelte";
   import { State } from "$lib/playground/lib/app.svelte";
-  import {
-    files_from_params,
-    params_from_url,
-  } from "$lib/playground/lib/share";
+  import { params_from_url } from "$lib/playground/lib/share";
+  import { decode_state } from "$lib/playground/lib/share/codec";
   import { onMount } from "svelte";
 
   let resolve: (state: State) => void;
@@ -14,15 +12,13 @@
   });
 
   onMount(async () => {
-    const state = params_from_url(page.url);
-    console.log(state);
-    if (state === null) {
+    const params = params_from_url(page.url);
+    if (params === null) {
       resolve(State.default());
       return;
     }
-    const files = await files_from_params(state);
-    console.log(files);
-    const app = new State(files);
+    const state = await decode_state(params.version, params.payload);
+    const app = State.from(state);
     resolve(app);
   });
 </script>

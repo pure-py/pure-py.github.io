@@ -4,6 +4,7 @@ import type { PurePy } from "./purepy";
 import { _File, type StaticFile, type ReadonlyFile } from "./file.svelte";
 import { nonempty_map, type NonEmpty } from "$lib/utils/non-empty";
 import type { Stdout } from "./stdout.svelte";
+import type { SharableState } from "./share/codec";
 
 type Editor = {
   set_doc: (str: string) => void;
@@ -37,11 +38,11 @@ export class State {
   check_result: Result | null;
   eval_result: Result | null;
 
-  constructor(files: NonEmpty<StaticFile>) {
+  constructor(files: NonEmpty<StaticFile>, active_index = 0) {
     this._files = $state(nonempty_map(files, (f) => new _File(f.path, f.data)));
     this.files = $derived(nonempty_map(this._files, (f) => f.meta));
 
-    this._active_file_index = $state(0);
+    this._active_file_index = $state(active_index);
     this._active_file = $state(this._files[this._active_file_index]);
     this.active_file_index = $derived(this._active_file_index);
     this.active_file = $derived(this._active_file.meta);
@@ -59,6 +60,13 @@ export class State {
       { path: "main.py", data: main_py },
       { path: "other.py", data: other_py },
     ]);
+  };
+
+  static from = (state: SharableState) => {
+    return new State(
+      state.files,
+      Math.min(state.active ?? 0, state.files.length),
+    );
   };
 
   // private get_file = (index: number) => {
@@ -229,4 +237,12 @@ export class State {
 
       this.stdout?.write("---");
     });
+
+  share_state = () => {
+    this.save_all();
+    return {
+      files: this.files,
+      active: this.active_file_index,
+    };
+  };
 }
