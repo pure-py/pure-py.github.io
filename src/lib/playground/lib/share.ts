@@ -1,5 +1,7 @@
 // these are mostly convenience functions and subject to change
 
+import type { NonEmpty } from "$lib/utils/non-empty";
+import type { StaticFile } from "./file.svelte";
 import {
   decode_state,
   encode_state,
@@ -9,15 +11,14 @@ import {
   type EncodedState,
 } from "./share/codec";
 
-export const url_with_params_from_src = async (url: URL, src: string) => {
-  // since we don't actually support multiple files yet
+export const url_with_params_from_files = async (
+  url: URL,
+  files: NonEmpty<StaticFile>,
+) => {
+  url = new URL(url);
+
   const state: SharableState = {
-    files: [
-      {
-        path: "main.py",
-        data: src,
-      },
-    ],
+    files,
   };
 
   const encoded = await encode_state(state);
@@ -36,7 +37,7 @@ export const params_from_url = (url: URL) => {
   }
 };
 
-export const src_from_params = async (params: EncodedState) => {
+export const files_from_params = async (params: EncodedState) => {
   const state = await decode_state(params.version, params.payload);
-  return state.files[0].data;
+  return state.files;
 };

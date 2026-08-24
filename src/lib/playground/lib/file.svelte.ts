@@ -11,7 +11,7 @@ export type ReadonlyFile = {
 };
 
 export class _File {
-  private _dirty = false;
+  private _dirty: boolean;
   private _data: string;
   private _buffer: string;
 
@@ -20,6 +20,7 @@ export class _File {
   constructor(path: string, data: string) {
     this._data = $state(data);
     this._buffer = $state(data);
+    this._dirty = $state(false);
 
     this.meta = $derived({
       path,

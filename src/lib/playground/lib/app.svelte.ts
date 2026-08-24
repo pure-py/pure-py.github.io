@@ -90,14 +90,28 @@ export class State {
 
   // save the active file
   save_open_file = () => {
-    this._active_file.save();
-    this.purepy?.write_file(
-      this._active_file.meta.path,
-      this._active_file.meta.data,
-    );
+    console.log(this._active_file.meta);
 
-    this.check_result = null;
-    this.eval_result = null;
+    if (this._active_file.meta.dirty) {
+      this._active_file.save();
+      this.purepy?.write_file(
+        this._active_file.meta.path,
+        this._active_file.meta.data,
+      );
+
+      this.check_result = null;
+      this.eval_result = null;
+    }
+  };
+
+  save_all = () => {
+    this.save_open_file();
+    for (const file of this._files) {
+      if (file.meta.dirty) {
+        file.save();
+        this.purepy?.write_file(file.meta.path, file.meta.data);
+      }
+    }
   };
 
   write_open_file = (data: string) => {
