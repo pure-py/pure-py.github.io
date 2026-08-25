@@ -57,7 +57,7 @@ export const set_encoded_state = (
   url = new URL(url);
   const versioned_bytes = prepend_version(VERSION, payload);
   const encoded = bytes_to_url(versioned_bytes);
-  url.hash = `#${encoded}`;
+  url.hash = `#share=${encoded}`;
   return url;
 };
 
@@ -75,7 +75,7 @@ export const get_encoded_state = (url: URL) => {
     return null;
   }
   // non-empty hash is prefixed with #
-  const fragment = url.hash.replace(/^#/, "");
+  const fragment = url.hash.replace(/^#(share=)?/, "");
   const versioned_bytes = url_to_bytes(fragment);
   const [version, payload] = split_version(versioned_bytes);
 
