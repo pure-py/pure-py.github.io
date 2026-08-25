@@ -1,3 +1,5 @@
+// these are mostly convenience functions and subject to change
+
 import {
   decode_state,
   encode_state,
@@ -38,6 +40,3 @@ export const src_from_params = async (params: EncodedState) => {
   const state = await decode_state(params.version, params.payload);
   return state.files[0].data;
 };
-
-// http://localhost:5173/playground#AKtWSsvMSS1WsoquVipILMlQslLKTczM0yuoVNJRSkksSVSyUiooyswr0YhR8kjNycnXUSjPL8pJUYxR0lSqja0FAA==
-// http://localhost:5173/playground#AKtWSsvMSS1WsoquVipILMlQslLKTczM0yuoVNJRSkksSVSyUiooyswr0YhRcs_PT0mqTNVRKM8vyklRjFHSVKqNrQUA

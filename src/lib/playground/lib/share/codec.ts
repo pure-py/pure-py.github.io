@@ -1,16 +1,10 @@
-// The state is encoded in the URL in three parts, e.g.
-// /playground?v=0&c=1&p=e215OiBvYmplY3QgaXMgdm...
+// The state is encoded in the URL hash fragment as:
+// /playground#e215OiBvYmplY3QgaXMgdm...
 //
-// The `v` (version) parameter specifies the encoding, which allows us
-// to support multiple different encodings, which is probably
-// only useful if we need to make backwards incompatible changes.
-//
-// The 'c' (compression) parameter tells us if compression is used. This will
-// typically be the case, but given so we have the option to selectively
-// skip compression without needing to handle a different encoding
-// version.
-//
-// The 'p' (payload) paramater is the URL-friendly encoding of our state data.
+// The first byte of the hash represents a version number, this can be
+// used to distinguish different encoding/compression methods, and/or
+// if there are breaking changes in the state data object. The rest of
+// the hash contains the state data object encoded per the version.
 //
 // When making any changes here, we should be mindful to keep
 // the structure flexible such that it is easy to add new properties
@@ -18,12 +12,8 @@
 // compatibility whenever possible. If it is not possible, we should
 // write a new parser/validator with a different version number.
 //
-// Rather than encode the directory structure through nested
-// objects/arrays, for the sake of simplicity, we only worry
-// about files here and represent any hierarchy through paths.
-//
-// Be aware that breaking changes can occur in the object structure
-// and in its serialisation.
+// Be aware that breaking changes can occur both in the state data object
+// and in the encoding.
 
 import { z } from "zod/mini";
 
