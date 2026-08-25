@@ -1,13 +1,13 @@
 import {
-  params_to_state,
+  decode_state,
+  encode_state,
+  get_encoded_state,
+  set_encoded_state,
   SharableState,
-  SharableStateParams,
-  state_to_params,
+  type EncodedState,
 } from "./share/codec";
 
 export const url_with_params_from_src = async (url: URL, src: string) => {
-  url = new URL(url);
-
   // since we don't actually support multiple files yet
   const state: SharableState = {
     files: [
@@ -18,28 +18,14 @@ export const url_with_params_from_src = async (url: URL, src: string) => {
     ],
   };
 
-  const encoded = await state_to_params(state);
-
-  url.searchParams.set("v", encoded.version);
-  url.searchParams.set("c", encoded.compression);
-  url.searchParams.set("p", encoded.payload);
-
-  return url;
+  const encoded = await encode_state(state);
+  const new_url = set_encoded_state(url, encoded);
+  return new_url;
 };
 
 export const params_from_url = (url: URL) => {
   try {
-    const version = url.searchParams.get("v");
-    const compression = url.searchParams.get("c");
-    const payload = url.searchParams.get("p");
-
-    // if only some are null, this should cause a parse error (below)
-    if ([version, compression, payload].every((x) => x === null)) {
-      return null;
-    }
-
-    const params = SharableStateParams.parse({ version, compression, payload });
-
+    const params = get_encoded_state(url);
     return params;
   } catch (error) {
     // some visual feedback may be nice
@@ -48,7 +34,10 @@ export const params_from_url = (url: URL) => {
   }
 };
 
-export const src_from_params = async (params: SharableStateParams) => {
-  const state = await params_to_state(params);
+export const src_from_params = async (params: EncodedState) => {
+  const state = await decode_state(params.version, params.payload);
   return state.files[0].data;
 };
+
+// http://localhost:5173/playground#AKtWSsvMSS1WsoquVipILMlQslLKTczM0yuoVNJRSkksSVSyUiooyswr0YhR8kjNycnXUSjPL8pJUYxR0lSqja0FAA==
+// http://localhost:5173/playground#AKtWSsvMSS1WsoquVipILMlQslLKTczM0yuoVNJRSkksSVSyUiooyswr0YhRcs_PT0mqTNVRKM8vyklRjFHSVKqNrQUA

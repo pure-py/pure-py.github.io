@@ -28,16 +28,27 @@
 import { z } from "zod/mini";
 
 import {
+  bytes_to_object,
   bytes_to_url,
   deflate_bytes,
-  bytes_to_object,
-  object_to_bytes,
-  url_to_bytes,
   inflate_bytes,
+  object_to_bytes,
+  prepend_version,
+  split_version,
+  url_to_bytes,
 } from "./utils";
 
 export type Version = (typeof VERSIONS)[number];
-export const VERSIONS = ["0"] as const;
+const VERSIONS = [0] as const;
+const VERSION = 0;
+
+const is_valid_version = (version: number): version is Version =>
+  VERSIONS.some((valid_version) => version === valid_version);
+
+export type EncodedState = {
+  version: Version;
+  payload: Uint8Array<ArrayBuffer>;
+};
 
 const SharableFile = z.object({
   path: z.string(),
@@ -49,27 +60,47 @@ export const SharableState = z.object({
   files: z.tuple([SharableFile], SharableFile),
 });
 
-export type SharableStateParams = z.infer<typeof SharableStateParams>;
-export const SharableStateParams = z.object({
-  version: z.literal(VERSIONS),
-  compression: z.literal("1"),
-  payload: z.string(),
-});
-
-export const state_to_params = async (
-  state: SharableState,
-): Promise<SharableStateParams> => {
-  const raw = object_to_bytes(state);
-  const deflated = await deflate_bytes(raw);
-  const encoded = bytes_to_url(deflated);
-  return { version: "0", compression: "1", payload: encoded } as const;
+export const set_encoded_state = (
+  url: URL,
+  payload: Uint8Array<ArrayBuffer>,
+) => {
+  url = new URL(url);
+  const versioned_bytes = prepend_version(VERSION, payload);
+  const encoded = bytes_to_url(versioned_bytes);
+  url.hash = `#${encoded}`;
+  return url;
 };
 
-export const params_to_state = async ({
-  payload,
-}: SharableStateParams): Promise<SharableState> => {
-  const decoded = url_to_bytes(payload);
-  const inflated = await inflate_bytes(decoded);
-  const object = bytes_to_object(inflated);
+export const encode_state = async (state: SharableState) => {
+  // these parts, including the parameter type, can be changed
+  // if necessary with proper version handling
+  const raw_bytes = object_to_bytes(state);
+  const deflated_bytes = await deflate_bytes(raw_bytes);
+  return deflated_bytes;
+};
+
+// this part is sacred and cannot change
+export const get_encoded_state = (url: URL) => {
+  if (url.hash === "") {
+    return null;
+  }
+  // non-empty hash is prefixed with #
+  const fragment = url.hash.replace(/^#/, "");
+  const versioned_bytes = url_to_bytes(fragment);
+  const [version, payload] = split_version(versioned_bytes);
+
+  if (!is_valid_version(version)) {
+    throw new Error("Unsupported encoding");
+  }
+
+  return { version, payload };
+};
+
+export const decode_state = async (
+  version: Version,
+  payload: Uint8Array<ArrayBuffer>,
+) => {
+  const raw_bytes = await inflate_bytes(payload);
+  const object = bytes_to_object(raw_bytes);
   return SharableState.parse(object);
 };

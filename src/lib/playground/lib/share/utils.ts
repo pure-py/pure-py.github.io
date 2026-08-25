@@ -55,6 +55,21 @@ export const inflate_bytes = async (bytes: Uint8Array<ArrayBuffer>) => {
 };
 
 /*
+ * Versioning
+ */
+
+export const prepend_version = (version: number, payload: Uint8Array) => {
+  const bytes = new Uint8Array(payload.length + 1);
+  bytes[0] = version;
+  bytes.set(payload, 1);
+  return bytes;
+};
+
+export const split_version = (bytes: Uint8Array<ArrayBuffer>) => {
+  return [bytes[0], bytes.slice(1)] as const;
+};
+
+/*
  * URL encoding
  */
 
