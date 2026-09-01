@@ -7,6 +7,7 @@ import reasons_py from "$lib/assets/reasons.py?raw";
 // loading experience on slower connections
 import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
+import type { ReadonlyFile } from "./file.svelte";
 
 const PurePyError = z.object({
   msg: z.string(),
@@ -32,6 +33,7 @@ export class PurePy {
 
   constructor(pyodide: PyodideAPI) {
     this.pyodide = pyodide;
+    pyodide.setDebug(true);
     pyodide.FS.writeFile("parse.py", parse_py);
     pyodide.FS.writeFile("check_module.py", check_module_py);
     pyodide.FS.writeFile("reasons.py", reasons_py);
@@ -54,6 +56,10 @@ export class PurePy {
     return path;
   };
 
+  delete_file = (path: string) => {
+    this.pyodide.FS.unlink(path);
+  };
+
   run = (src: string) => {
     try {
       const result: unknown = this.pyodide.runPython(src);
@@ -67,13 +73,14 @@ export class PurePy {
     }
   };
 
-  parse = (path: string) =>
+  parse = (file: ReadonlyFile) =>
     capture_err(() =>
-      this.run(`
+      this.run(
+        `
         import parse
         def fn():
           try:
-            parse.check_file("${path}")
+            parse.check_file("${file.path}")
           except SyntaxError as err:
             return {
               "msg": "Syntax error",
@@ -81,27 +88,28 @@ export class PurePy {
               "col": err.offset
             }
         fn()
-      `),
+      `,
+      ),
     );
 
-  check = (path: string) =>
+  check = (file: ReadonlyFile) =>
     capture_err(() =>
-      this.run(`
+      this.run(
+        `
         import ast
         import check_module
-        check_module.check_file("${path}")
-      `),
+        check_module.check_file("${file.path}")
+      `,
+      ),
     );
 
-  parse_and_check = (src: string) => {
-    const path = this.write_file("whatever.purepy", src);
-
-    const parse_result = this.parse(path);
+  parse_and_check = (file: ReadonlyFile) => {
+    const parse_result = this.parse(file);
     if (!parse_result.success) {
       return parse_result;
     }
 
-    const check_result = this.check(path);
+    const check_result = this.check(file);
     if (!check_result.success) {
       return check_result;
     }
@@ -109,8 +117,8 @@ export class PurePy {
     return { success: true, error: null } as const;
   };
 
-  evaluate = (src: string) => {
-    const result = this.run(src);
+  evaluate = (file: ReadonlyFile) => {
+    const result = this.run(file.data);
     return { success: true, output: result } as const;
   };
 }
