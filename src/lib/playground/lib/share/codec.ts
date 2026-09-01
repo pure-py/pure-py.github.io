@@ -1,19 +1,21 @@
-// The state is encoded in the URL hash fragment as:
-// /playground#e215OiBvYmplY3QgaXMgdm...
+// The state is encoded in the URL’s `#share` hash fragment.
+// The fragment value is a URL-safe encoding of the versioned
+// state bytes.
 //
-// The first byte of the hash represents a version number, this can be
-// used to distinguish different encoding/compression methods, and/or
-// if there are breaking changes in the state data object. The rest of
-// the hash contains the state data object encoded per the version.
+// The first byte of the decoded payload represents a version number. This
+// can be used to distinguish different encoding/compression methods and/or
+// to handle breaking changes in the state data object. The remaining bytes,
+// i.e. the payload, contain the state data object, encoded according to that
+// version.
 //
-// When making any changes here, we should be mindful to keep
-// the structure flexible such that it is easy to add new properties
-// without breaking backwards capability. We should also avoid breaking
-// compatibility whenever possible. If it is not possible, we should
-// write a new parser/validator with a different version number.
+// When making changes here, keep the structure flexible so that new
+// properties can be added without breaking backward compatibility. Avoid
+// breaking compatibility whenever possible. If a breaking change is
+// unavoidable, implement a new parser/validator with a different version
+// number.
 //
-// Be aware that breaking changes can occur both in the state data object
-// and in the encoding.
+// Breaking changes can occur both in the state data object and in the
+// encoding format.
 
 import { z } from "zod/mini";
 
@@ -28,9 +30,10 @@ import {
   url_to_bytes,
 } from "./utils";
 
-export type Version = (typeof VERSIONS)[number];
 const VERSIONS = [0] as const;
-const VERSION = 0;
+export type Version = (typeof VERSIONS)[number];
+
+const VERSION: Version = 0;
 
 const is_valid_version = (version: number): version is Version =>
   VERSIONS.some((valid_version) => version === valid_version);
@@ -86,11 +89,22 @@ export const get_encoded_state = (url: URL) => {
   return { version, payload };
 };
 
-export const decode_state = async (
+const decoders = {
+  0: async (
+    payload: Uint8Array<ArrayBuffer>,
+  ): Promise<SharableState> => {
+    const raw_bytes = await inflate_bytes(payload);
+    const object = bytes_to_object(raw_bytes);
+    return SharableState.parse(object);
+  },
+} satisfies Record<
+  Version,
+  (payload: Uint8Array<ArrayBuffer>) => Promise<SharableState>
+>;
+
+export const decode_state = (
   version: Version,
   payload: Uint8Array<ArrayBuffer>,
 ) => {
-  const raw_bytes = await inflate_bytes(payload);
-  const object = bytes_to_object(raw_bytes);
-  return SharableState.parse(object);
+  return decoders[version](payload);
 };
