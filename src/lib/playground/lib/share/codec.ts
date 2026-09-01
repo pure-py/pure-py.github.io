@@ -90,9 +90,7 @@ export const get_encoded_state = (url: URL) => {
 };
 
 const decoders = {
-  0: async (
-    payload: Uint8Array<ArrayBuffer>,
-  ): Promise<SharableState> => {
+  0: async (payload: Uint8Array<ArrayBuffer>): Promise<SharableState> => {
     const raw_bytes = await inflate_bytes(payload);
     const object = bytes_to_object(raw_bytes);
     return SharableState.parse(object);
