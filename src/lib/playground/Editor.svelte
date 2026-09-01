@@ -3,17 +3,29 @@
   import { onMount } from "svelte";
 
   type Props = {
-    value: string;
+    initial_value: string;
     onupdate: (value: string) => void;
-    onload: () => void;
   };
 
-  let { value, onupdate, onload }: Props = $props();
+  let { initial_value, onupdate }: Props = $props();
 
   let element: HTMLDivElement;
   let view: EditorView | undefined;
 
-  let loading = $state(true);
+  let ready_resolve: () => void;
+  export const ready = new Promise<void>(
+    (resolve) => (ready_resolve = resolve),
+  );
+
+  export const set_doc = async (src: string) => {
+    await ready;
+    if (view === undefined) {
+      // never
+      return;
+    }
+    const tx = view.state.update({ changes: { from: 0, insert: src } });
+    view.dispatch(tx);
+  };
 
   const setup = async () => {
     const [{ basicSetup, EditorView }, { python }, { oneDark }] =
@@ -23,10 +35,8 @@
         import("@codemirror/theme-one-dark"),
       ]);
 
-    loading = false;
-
     view = new EditorView({
-      doc: value,
+      doc: initial_value,
       extensions: [
         basicSetup,
         oneDark,
@@ -46,7 +56,7 @@
       },
     });
 
-    onload();
+    ready_resolve();
   };
 
   onMount(() => {
@@ -57,8 +67,4 @@
   });
 </script>
 
-<div class="h-full w-full" id="editor" bind:this={element}>
-  {#if loading}
-    Loading...
-  {/if}
-</div>
+<div class="h-full w-full" id="editor" bind:this={element}></div>

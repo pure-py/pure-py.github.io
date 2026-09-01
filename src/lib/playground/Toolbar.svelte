@@ -3,7 +3,7 @@
   import ToolbarButton from "./components/ToolbarButton.svelte";
   import ToolbarLink from "./components/ToolbarLink.svelte";
 
-  let { check, run, is_busy } = $props();
+  let { share, check, run, is_busy } = $props();
 </script>
 
 <div class="flex h-10">
@@ -25,6 +25,7 @@
   >
 
   <span class="ml-auto"></span>
+  <ToolbarButton onclick={share} busy={is_busy}>Share</ToolbarButton>
   <ToolbarButton onclick={check} busy={is_busy}>Check</ToolbarButton>
   <ToolbarButton onclick={run} busy={is_busy}>
     Run
