@@ -1,13 +1,12 @@
 <script lang="ts">
-  import logo from "$lib/assets/image/logo.png";
+  import type { PageProps } from "./$types";
+  let { data }: PageProps = $props();
 </script>
 
-<svelte:head>
-  <title>PurePy</title>
-</svelte:head>
-
 <section id="top" class="hero">
-  <h1><img class="hero-logo" src={logo} alt="PurePy" /></h1>
+  <h1>
+    <img class="hero-logo" src={data.config.logo} alt={data.config.name} />
+  </h1>
   <p class="tagline">
     A pure, functional subset of Python for scientific computing
   </p>
@@ -16,27 +15,24 @@
     reference checker for a side-effect-free subset of Python.
   </p>
   <div class="cta">
-    <a
-      class="button primary"
-      href="https://github.com/pure-py/pure-py-spec/releases/latest"
-      >Read the spec</a
-    >
-    <a class="button" href="https://github.com/pure-py/pure-py-spec">GitHub</a>
+    <a class="button primary" href={data.config.spec}>Read the spec</a>
+
+    <a class="button" href={data.config.github}>GitHub</a>
   </div>
 </section>
 
 <section id="overview" class="prose">
   <h2>Overview</h2>
   <p>
-    PurePy defines a pure, side-effect-free subset of Python. It is aimed
-    initially at researchers in programming languages and pedagogy, and is
-    intended to grow into a common language for scientific computing, supporting
-    portable applications in modelling, data processing, analysis, and
-    visualisation.
+    {data.config.name} defines a pure, side-effect-free subset of Python. It is aimed
+    initially at researchers in programming languages and pedagogy, and is intended
+    to grow into a common language for scientific computing, supporting portable applications
+    in modelling, data processing, analysis, and visualisation.
   </p>
   <p>
     The standard defines a versioned formal grammar, a formal semantics, and a
-    reference checker. Every compliant implementation accepts any valid PurePy
+    reference checker. Every compliant implementation accepts any valid {data
+      .config.name}
     program and behaves according to the formal semantics.
   </p>
 </section>
@@ -75,7 +71,7 @@
 </section>
 
 <section id="features" class="features">
-  <h2>Why PurePy</h2>
+  <h2>Why {data.config.name}</h2>
   <div class="grid">
     <div class="card">
       <h3>Pure &amp; functional</h3>
@@ -84,8 +80,8 @@
     <div class="card">
       <h3>Pythonic</h3>
       <p>
-        A strict subset of Python: every valid PurePy program is valid Python,
-        and runs with exactly the same runtime behaviour.
+        A strict subset of Python: every valid {data.config.name} program is valid
+        Python, and runs with exactly the same runtime behaviour.
       </p>
     </div>
     <div class="card">
