@@ -51,6 +51,7 @@ const SharableFile = z.object({
 export type SharableState = z.infer<typeof SharableState>;
 export const SharableState = z.object({
   files: z.tuple([SharableFile], SharableFile),
+  active: z.optional(z.int().check(z.nonnegative())),
 });
 
 export const set_encoded_state = (
