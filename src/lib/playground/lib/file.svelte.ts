@@ -1,3 +1,4 @@
+import { validate_filename } from "./paths";
 import { nonempty_map, type NonEmpty } from "$lib/utils/non-empty";
 
 export type StaticFile = {
@@ -13,25 +14,33 @@ export type ReadonlyFile = {
 };
 
 export class File {
+  #path: string;
   #data: string;
   #buffer: string;
-
   #dirty: boolean;
 
   readonly info: ReadonlyFile;
 
   constructor(path: string, data: string) {
+    validate_filename(path);
+
+    this.#path = $state(path);
     this.#data = $state(data);
     this.#buffer = $state(data);
     this.#dirty = $state(false);
 
     this.info = $derived({
-      path,
+      path: this.#path,
       data: this.#data,
       buffer: this.#buffer,
       dirty: this.#dirty,
     });
   }
+
+  rename = (path: string) => {
+    validate_filename(path);
+    this.#path = path;
+  };
 
   get buffer() {
     return this.#buffer;
@@ -132,13 +141,41 @@ export class FileSystem {
   };
 
   new = (path: string): ReadonlyFile => {
+    validate_filename(path);
+
     if (this.exists(path)) {
       throw new Error("File already exists at this path");
     }
+
     const file = new File(path, "");
     this.#files.push(file);
     this.run_hooks("write", file.info);
     return this.open(this.last_index());
+  };
+
+  rename = (fd: number, new_path: string): ReadonlyFile => {
+    validate_filename(new_path);
+
+    const file = this.#file(fd);
+
+    if (file.info.path === new_path) {
+      return file.info;
+    }
+
+    if (this.exists(new_path)) {
+      throw new Error("File already exists at this path");
+    }
+
+    const old_file = file.info;
+
+    file.rename(new_path);
+
+    // Remove the old path from Pyodide, then write the renamed file to its
+    // new path using the existing filesystem hooks.
+    this.run_hooks("delete", old_file);
+    this.run_hooks("write", file.info);
+
+    return file.info;
   };
 
   // Index methods
@@ -164,20 +201,21 @@ export class FileSystem {
       throw new Error("Attempted to delete only file.");
     }
 
+    const file = this.#file(fd);
+
     const is_active = fd === this.#active_fd;
     const is_last = fd === this.last_index();
 
-    const [file] = this.#files.splice(fd, 1);
-
-    if (file === undefined) {
-      throw new Error("Index out of bounds");
-    }
+    this.#files.splice(fd, 1);
 
     this.run_hooks("delete", file.info);
 
-    // if this is the active file, and happens to be the last,
-    // we need to set the active_file to the new last
-    if (is_active) {
+    // Keep the active index valid:
+    // - removing a file before the active file shifts later indices left
+    // - removing the active file selects a neighbouring file
+    if (fd < this.#active_fd) {
+      this.#active_fd -= 1;
+    } else if (is_active) {
       this.open(is_last ? fd - 1 : fd);
     }
 

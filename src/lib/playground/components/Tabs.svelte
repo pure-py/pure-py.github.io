@@ -1,20 +1,92 @@
 <script lang="ts">
   import type { State } from "../lib/app.svelte";
+  import { toast } from "./Toaster.svelte";
 
   let { app }: { app: State } = $props();
 
   let new_file_prompt = $state(false);
   let new_file_name = $state("");
 
-  let onfocusout = () => {
-    new_file_prompt = false;
+  let renaming_fd: number | null = $state(null);
+  let renaming_name = $state("");
 
+  function focus_on_mount(node: HTMLInputElement) {
+    node.focus();
+  }
+
+  const create_file = () => {
     if (new_file_name === "") {
       return;
     }
 
-    app.fs.new(new_file_name);
-    new_file_name = "";
+    try {
+      app.fs.new(new_file_name);
+
+      toast(`Created ${new_file_name}`, "success");
+
+      new_file_name = "";
+      new_file_prompt = false;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not create file";
+
+      toast(message, "error");
+    }
+  };
+
+  const onfocusout = () => {
+    create_file();
+  };
+
+  const onsubmit = (event: SubmitEvent) => {
+    event.preventDefault();
+    create_file();
+  };
+
+  const start_rename = (index: number, current_name: string) => {
+    renaming_fd = index;
+    renaming_name = current_name;
+  };
+
+  const cancel_rename = () => {
+    renaming_fd = null;
+    renaming_name = "";
+  };
+
+  const commit_rename = () => {
+    if (renaming_fd === null) {
+      return;
+    }
+
+    const fd = renaming_fd;
+    const new_name = renaming_name.trim();
+    const current_name = app.fs.files[fd]?.path;
+
+    cancel_rename();
+
+    if (new_name === "" || new_name === current_name) {
+      return;
+    }
+
+    try {
+      app.fs.rename(fd, new_name);
+
+      toast(`Renamed “${current_name}” to “${new_name}”`, "success");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not rename file";
+
+      toast(message, "error");
+    }
+  };
+
+  const on_rename_keydown = (event: KeyboardEvent) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commit_rename();
+    } else if (event.key === "Escape") {
+      cancel_rename();
+    }
   };
 </script>
 
@@ -31,7 +103,24 @@
             {/if}
           </div>
 
-          {file.path}
+          {#if renaming_fd === index}
+            <input
+              type="text"
+              bind:value={renaming_name}
+              onblur={commit_rename}
+              onkeydown={on_rename_keydown}
+              use:focus_on_mount
+            />
+          {:else}
+            <button
+              type="button"
+              title="Double-click to rename"
+              class="cursor-text"
+              ondblclick={() => start_rename(index, file.path)}
+            >
+              {file.path}
+            </button>
+          {/if}
         </div>
 
         <div class="flex justify-end w-6">
@@ -49,7 +138,7 @@
               >
                 <path
                   fill-rule="evenodd"
-                  d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
+                  d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5A.75.75 0 0 1 6.05 6Z"
                   clip-rule="evenodd"
                 />
               </svg>
@@ -85,13 +174,12 @@
       <div
         class="px-4 flex justify-center items-center text-sm cursor-pointer rounded-t-md bg-zinc-800 text-zinc-200"
       >
-        <form onsubmit={() => {}}>
-          <!-- svelte-ignore a11y_autofocus -->
+        <form {onsubmit}>
           <input
             type="text"
             bind:value={new_file_name}
             {onfocusout}
-            autofocus={true}
+            use:focus_on_mount
           />
         </form>
       </div>

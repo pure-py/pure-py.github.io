@@ -8,6 +8,7 @@ import reasons_py from "$lib/assets/reasons.py?raw";
 import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
+import { CHECK_FILE_PATH, validate_filename } from "./paths";
 
 const PurePyError = z.object({
   msg: z.string(),
@@ -52,10 +53,12 @@ export class PurePy {
   };
 
   write_file = (file: ReadonlyFile) => {
+    validate_filename(file.path);
     this.pyodide.FS.writeFile(file.path, file.data);
   };
 
   delete_file = (file: ReadonlyFile) => {
+    validate_filename(file.path);
     this.pyodide.FS.unlink(file.path);
   };
 
@@ -72,14 +75,20 @@ export class PurePy {
     }
   };
 
-  parse = (file: ReadonlyFile) =>
+  private write_check_file = (file: ReadonlyFile) => {
+    // Write the file's contents to a fixed internal path. The user-visible
+    // filename is deliberately not used in generated Python source.
+    this.pyodide.FS.writeFile(CHECK_FILE_PATH, file.data);
+  };
+
+  parse = (path: string) =>
     capture_err(() =>
       this.run(
         `
         import parse
         def fn():
           try:
-            parse.check_file("${file.path}")
+            parse.check_file("${path}")
           except SyntaxError as err:
             return {
               "msg": "Syntax error",
@@ -91,24 +100,26 @@ export class PurePy {
       ),
     );
 
-  check = (file: ReadonlyFile) =>
+  check = (path: string) =>
     capture_err(() =>
       this.run(
         `
         import ast
         import check_module
-        check_module.check_file("${file.path}")
+        check_module.check_file("${path}")
       `,
       ),
     );
 
   parse_and_check = (file: ReadonlyFile) => {
-    const parse_result = this.parse(file);
+    this.write_check_file(file);
+
+    const parse_result = this.parse(CHECK_FILE_PATH);
     if (!parse_result.success) {
       return parse_result;
     }
 
-    const check_result = this.check(file);
+    const check_result = this.check(CHECK_FILE_PATH);
     if (!check_result.success) {
       return check_result;
     }

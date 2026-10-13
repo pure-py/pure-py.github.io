@@ -45,9 +45,11 @@ export class State {
   };
 
   static from = (state: SharableState) => {
+    const active = state.active ?? 0;
+
     return new State(
       state.files,
-      Math.min(state.active ?? 0, state.files.length),
+      Math.max(0, Math.min(active, state.files.length - 1)),
     );
   };
 
@@ -69,6 +71,7 @@ export class State {
       open: this.#fs.open,
       active_fd: this.#fs.active_fd,
       remove: this.#fs.remove,
+      rename: this.#fs.rename,
       save_all: this.#fs.save_all,
     };
   }

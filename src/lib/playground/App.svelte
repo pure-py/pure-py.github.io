@@ -6,8 +6,11 @@
   import Terminal from "$lib/playground/components/Terminal.svelte";
   import TerminalDragger from "$lib/playground/components/TerminalDragger.svelte";
   import Toolbar from "$lib/playground/components/Toolbar.svelte";
+  import Toaster, { toast } from "$lib/playground/components/Toaster.svelte";
+
   import { PurePy } from "$lib/playground/lib/purepy";
   import { url_with_params_from_state } from "$lib/playground/lib/share";
+
   import { onMount } from "svelte";
   import Tabs from "./components/Tabs.svelte";
   import { State } from "./lib/app.svelte";
@@ -25,14 +28,21 @@
       app.fs.save_all();
       const state = app.serialise();
       const url = await url_with_params_from_state(page.url, state);
+
       // update the url without reloading page
       const update_url = goto(url);
-      // TODO: add visual feedback
       const copy_to_clipboard = navigator.clipboard.writeText(url.toString());
 
       await Promise.all([update_url, copy_to_clipboard]);
+
+      toast("Share link copied to clipboard");
     } catch (error) {
       console.error(error);
+
+      toast(
+        error instanceof Error ? error.message : "Could not create share link",
+        "error",
+      );
     }
   };
 
@@ -41,12 +51,25 @@
   };
 
   const setup_pyodide = async () => {
-    app.stdout.write("Loading PurePy...");
-    purepy = await PurePy.load();
-    purepy.attach_stdout(app.stdout);
-    app.register_purepy(purepy);
-    app.stdout.write("Ready");
-    app.stdout.write("Press Cmd/Ctrl + S or use the button below to run");
+    toast("Loading PurePy …");
+
+    try {
+      purepy = await PurePy.load();
+      purepy.attach_stdout(app.stdout);
+      app.register_purepy(purepy);
+
+      toast("PurePy is ready—press", "success", {
+        keys: ["⌘S"],
+        action: "or use the button above to run",
+      });
+    } catch (error) {
+      console.error(error);
+
+      toast(
+        error instanceof Error ? error.message : "Could not load PurePy",
+        "error",
+      );
+    }
   };
 
   onMount(async () => {
@@ -87,4 +110,6 @@
     />
     <Terminal {terminalHeight} stdout={app.stdout} />
   </div>
+
+  <Toaster />
 </div>
