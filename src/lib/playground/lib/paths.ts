@@ -1,22 +1,25 @@
-export const CHECK_FILE_PATH = "__purepy_check__.purepy";
-
 export const RESERVED_PYODIDE_PATHS = new Set([
   "parse.py",
   "check_module.py",
   "reasons.py",
-  CHECK_FILE_PATH,
 ]);
 
-const FILENAME_PATTERN = /^[A-Za-z0-9._-]+$/;
+const SEGMENT_PATTERN = /^[A-Za-z0-9._-]+$/;
 
 export const validate_filename = (path: string) => {
-  if (!FILENAME_PATTERN.test(path)) {
+  const segments = path.split("/");
+
+  if (segments.some((segment) => segment === "")) {
+    throw new Error(`Invalid path: “${path}” cannot be empty`);
+  }
+
+  if (!segments.every((segment) => SEGMENT_PATTERN.test(segment))) {
     throw new Error(
-      "Invalid filename: use letters, numbers, dots, underscores, or hyphens",
+      `Invalid path: “${path}” must use letters, numbers, dots, underscores, or hyphens; separate folders with a forward slash`,
     );
   }
 
   if (RESERVED_PYODIDE_PATHS.has(path)) {
-    throw new Error("This filename is reserved by PurePy");
+    throw new Error(`Reserved path: “${path}” is used by PurePy`);
   }
 };

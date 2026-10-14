@@ -2,13 +2,13 @@ import * as z from "zod/mini";
 import parse_py from "$lib/assets/parse.py?raw";
 import check_module_py from "$lib/assets/check_module.py?raw";
 import reasons_py from "$lib/assets/reasons.py?raw";
-// we deliberately only loading the type here, and later
-// lazy-load the full import during initialisation, to improve
-// loading experience on slower connections
+// We deliberately only load the type here, and later lazy-load the full
+// import during initialisation, to improve the loading experience on
+// slower connections
 import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
-import { CHECK_FILE_PATH, validate_filename } from "./paths";
+import { validate_filename } from "./paths";
 
 const PurePyError = z.object({
   msg: z.string(),
@@ -48,12 +48,22 @@ export class PurePy {
 
   attach_stdout = (stdout: Stdout) => {
     this.pyodide.setStdout({ batched: stdout.write });
-
     this.pyodide.setStderr({ batched: stdout.write_err });
+  };
+
+  ensure_directory = (path: string) => {
+    const directory = path.split("/").slice(0, -1).join("/");
+
+    if (directory === "") {
+      return;
+    }
+
+    this.pyodide.FS.mkdirTree(directory);
   };
 
   write_file = (file: ReadonlyFile) => {
     validate_filename(file.path);
+    this.ensure_directory(file.path);
     this.pyodide.FS.writeFile(file.path, file.data);
   };
 
@@ -62,23 +72,25 @@ export class PurePy {
     this.pyodide.FS.unlink(file.path);
   };
 
+  rename_file = (old_file: ReadonlyFile, new_file: ReadonlyFile) => {
+    validate_filename(old_file.path);
+    validate_filename(new_file.path);
+
+    this.ensure_directory(new_file.path);
+    this.pyodide.FS.rename(old_file.path, new_file.path);
+  };
+
   run = (src: string) => {
     try {
       const result: unknown = this.pyodide.runPython(src);
       return result;
     } catch (error) {
-      // something went wrong in Python/Pyodide
+      // Something went wrong in Python/Pyodide
       console.error(error);
       return {
         msg: "Unhandled exception (see console)",
       };
     }
-  };
-
-  private write_check_file = (file: ReadonlyFile) => {
-    // Write the file's contents to a fixed internal path. The user-visible
-    // filename is deliberately not used in generated Python source.
-    this.pyodide.FS.writeFile(CHECK_FILE_PATH, file.data);
   };
 
   parse = (path: string) =>
@@ -112,14 +124,18 @@ export class PurePy {
     );
 
   parse_and_check = (file: ReadonlyFile) => {
-    this.write_check_file(file);
+    // Write the current editor contents to the user's file path so the
+    // checker sees exactly what is open in the editor, including unsaved
+    // changes. Diagnostics can therefore be attributed directly to
+    // `file.path`.
+    this.write_file(file);
 
-    const parse_result = this.parse(CHECK_FILE_PATH);
+    const parse_result = this.parse(file.path);
     if (!parse_result.success) {
       return parse_result;
     }
 
-    const check_result = this.check(CHECK_FILE_PATH);
+    const check_result = this.check(file.path);
     if (!check_result.success) {
       return check_result;
     }

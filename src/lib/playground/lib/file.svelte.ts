@@ -64,8 +64,9 @@ export class File {
   };
 }
 
-export type FileHook = (file: ReadonlyFile) => void;
-export type FileEvent = "open" | "write" | "delete";
+export type FileHook = (old_file: ReadonlyFile, new_file: ReadonlyFile) => void;
+
+export type FileEvent = "open" | "write" | "delete" | "rename";
 
 export class FileSystem {
   #files: NonEmpty<File>;
@@ -76,7 +77,12 @@ export class FileSystem {
 
   constructor(files: NonEmpty<StaticFile>, active_index: number) {
     this.#files = $state(nonempty_map(files, (f) => new File(f.path, f.data)));
-    this.#hooks = { open: [], write: [], delete: [] };
+    this.#hooks = {
+      open: [],
+      write: [],
+      delete: [],
+      rename: [],
+    };
     this.#active_fd = $state(active_index);
     this.#active_file = $derived(this.#file(this.#active_fd));
   }
@@ -84,7 +90,7 @@ export class FileSystem {
   #file = (fd: number) => {
     const file = this.#files[fd];
     if (file === undefined) {
-      throw new Error("Index out of bounds");
+      throw new Error(`Invalid index: ${fd} is out of bounds`);
     }
     return file;
   };
@@ -118,8 +124,12 @@ export class FileSystem {
     this.#hooks[event].push(hook);
   };
 
-  run_hooks = (event: FileEvent, file: ReadonlyFile) => {
-    this.#hooks[event].forEach((hook) => hook(file));
+  run_hooks = (
+    event: FileEvent,
+    old_file: ReadonlyFile,
+    new_file: ReadonlyFile = old_file,
+  ) => {
+    this.#hooks[event].forEach((hook) => hook(old_file, new_file));
   };
 
   for_each = (fn: (file: ReadonlyFile, index: number) => void) => {
@@ -144,7 +154,7 @@ export class FileSystem {
     validate_filename(path);
 
     if (this.exists(path)) {
-      throw new Error("File already exists at this path");
+      throw new Error(`File exists: “${path}” already exists`);
     }
 
     const file = new File(path, "");
@@ -163,17 +173,14 @@ export class FileSystem {
     }
 
     if (this.exists(new_path)) {
-      throw new Error("File already exists at this path");
+      throw new Error(`File exists: “${new_path}” already exists`);
     }
 
     const old_file = file.info;
 
     file.rename(new_path);
 
-    // Remove the old path from Pyodide, then write the renamed file to its
-    // new path using the existing filesystem hooks.
-    this.run_hooks("delete", old_file);
-    this.run_hooks("write", file.info);
+    this.run_hooks("rename", old_file, file.info);
 
     return file.info;
   };
@@ -198,7 +205,7 @@ export class FileSystem {
 
   remove = (fd: number): ReadonlyFile => {
     if (this.files.length === 1) {
-      throw new Error("Attempted to delete only file.");
+      throw new Error("Delete failed: cannot delete the only file");
     }
 
     const file = this.#file(fd);
@@ -222,7 +229,7 @@ export class FileSystem {
     return file.info;
   };
 
-  // for all files
+  // For all files
 
   save_all = () => {
     this.for_each((_, index) => this.save(index));

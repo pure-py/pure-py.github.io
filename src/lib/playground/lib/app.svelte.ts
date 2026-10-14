@@ -94,6 +94,7 @@ export class State {
     this.#fs.for_each(purepy.write_file);
     this.#fs.add_hook("write", purepy.write_file);
     this.#fs.add_hook("delete", purepy.delete_file);
+    this.#fs.add_hook("rename", purepy.rename_file);
     this.#busy = false;
   });
 
