@@ -10,12 +10,20 @@ export const validate_filename = (path: string) => {
   const segments = path.split("/");
 
   if (segments.some((segment) => segment === "")) {
-    throw new Error(`Invalid path: “${path}” cannot be empty`);
+    throw new Error(
+      `Invalid path: “${path}” cannot contain empty path segments`,
+    );
   }
 
-  if (!segments.every((segment) => SEGMENT_PATTERN.test(segment))) {
+  if (segments.some((segment) => !SEGMENT_PATTERN.test(segment))) {
     throw new Error(
       `Invalid path: “${path}” must use letters, numbers, dots, underscores, or hyphens; separate folders with a forward slash`,
+    );
+  }
+
+  if (segments.some((segment) => /^\.+$/.test(segment))) {
+    throw new Error(
+      `Invalid path: “${path}” cannot contain a path segment made only of dots`,
     );
   }
 

@@ -159,7 +159,14 @@ export class FileSystem {
 
     const file = new File(path, "");
     this.#files.push(file);
-    this.run_hooks("write", file.info);
+
+    try {
+      this.run_hooks("write", file.info);
+    } catch (error) {
+      this.#files.splice(this.#files.indexOf(file), 1);
+      throw error;
+    }
+
     return this.open(this.last_index());
   };
 
