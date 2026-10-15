@@ -15,7 +15,7 @@ export const public_config = {
   name: "PurePy",
   logo,
   github: "https://github.com/pure-py/pure-py-spec",
-  spec: "https://github.com/pure-py/pure-py-spec/releases/latest",
+  spec: "https://pure-py.github.io/pure-py-spec/latest/PurePy-spec.pdf",
   favicon: "/favicon.png",
 } satisfies SiteConfig;
 
