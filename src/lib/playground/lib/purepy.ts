@@ -2,11 +2,13 @@ import * as z from "zod/mini";
 import parse_py from "$lib/assets/parse.py?raw";
 import check_module_py from "$lib/assets/check_module.py?raw";
 import reasons_py from "$lib/assets/reasons.py?raw";
-// we deliberately only loading the type here, and later
-// lazy-load the full import during initialisation, to improve
-// loading experience on slower connections
+// We deliberately only load the type here, and later lazy-load the full
+// import during initialisation, to improve the loading experience on
+// slower connections
 import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
+import type { ReadonlyFile } from "./file.svelte";
+import { validate_filename } from "./paths";
 
 const PurePyError = z.object({
   msg: z.string(),
@@ -32,6 +34,7 @@ export class PurePy {
 
   constructor(pyodide: PyodideAPI) {
     this.pyodide = pyodide;
+    pyodide.setDebug(true);
     pyodide.FS.writeFile("parse.py", parse_py);
     pyodide.FS.writeFile("check_module.py", check_module_py);
     pyodide.FS.writeFile("reasons.py", reasons_py);
@@ -45,13 +48,36 @@ export class PurePy {
 
   attach_stdout = (stdout: Stdout) => {
     this.pyodide.setStdout({ batched: stdout.write });
-
     this.pyodide.setStderr({ batched: stdout.write_err });
   };
 
-  write_file = (path: string, src: string) => {
-    this.pyodide.FS.writeFile(path, src);
-    return path;
+  ensure_directory = (path: string) => {
+    const directory = path.split("/").slice(0, -1).join("/");
+
+    if (directory === "") {
+      return;
+    }
+
+    this.pyodide.FS.mkdirTree(directory);
+  };
+
+  write_file = (file: ReadonlyFile) => {
+    validate_filename(file.path);
+    this.ensure_directory(file.path);
+    this.pyodide.FS.writeFile(file.path, file.data);
+  };
+
+  delete_file = (file: ReadonlyFile) => {
+    validate_filename(file.path);
+    this.pyodide.FS.unlink(file.path);
+  };
+
+  rename_file = (old_file: ReadonlyFile, new_file: ReadonlyFile) => {
+    validate_filename(old_file.path);
+    validate_filename(new_file.path);
+
+    this.ensure_directory(new_file.path);
+    this.pyodide.FS.rename(old_file.path, new_file.path);
   };
 
   run = (src: string) => {
@@ -59,7 +85,7 @@ export class PurePy {
       const result: unknown = this.pyodide.runPython(src);
       return result;
     } catch (error) {
-      // something went wrong in Python/Pyodide
+      // Something went wrong in Python/Pyodide
       console.error(error);
       return {
         msg: "Unhandled exception (see console)",
@@ -69,7 +95,8 @@ export class PurePy {
 
   parse = (path: string) =>
     capture_err(() =>
-      this.run(`
+      this.run(
+        `
         import parse
         def fn():
           try:
@@ -81,27 +108,34 @@ export class PurePy {
               "col": err.offset
             }
         fn()
-      `),
+      `,
+      ),
     );
 
   check = (path: string) =>
     capture_err(() =>
-      this.run(`
+      this.run(
+        `
         import ast
         import check_module
         check_module.check_file("${path}")
-      `),
+      `,
+      ),
     );
 
-  parse_and_check = (src: string) => {
-    const path = this.write_file("whatever.purepy", src);
+  parse_and_check = (file: ReadonlyFile) => {
+    // Write the current editor contents to the user's file path so the
+    // checker sees exactly what is open in the editor, including unsaved
+    // changes. Diagnostics can therefore be attributed directly to
+    // `file.path`.
+    this.write_file(file);
 
-    const parse_result = this.parse(path);
+    const parse_result = this.parse(file.path);
     if (!parse_result.success) {
       return parse_result;
     }
 
-    const check_result = this.check(path);
+    const check_result = this.check(file.path);
     if (!check_result.success) {
       return check_result;
     }
@@ -109,8 +143,8 @@ export class PurePy {
     return { success: true, error: null } as const;
   };
 
-  evaluate = (src: string) => {
-    const result = this.run(src);
+  evaluate = (file: ReadonlyFile) => {
+    const result = this.run(file.data);
     return { success: true, output: result } as const;
   };
 }

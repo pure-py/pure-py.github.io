@@ -1,16 +1,17 @@
 <script lang="ts">
+  import type { Result } from "$lib/playground/lib/app.svelte";
+
   type Props = {
     type: "Check" | "Evaluate";
-    success: boolean | null;
-    time: number;
+    result: Result | null;
   };
 
-  let { type, success, time }: Props = $props();
+  let { type, result }: Props = $props();
 </script>
 
 <div class="flex items-center gap-1">
   <div class="shrink-0">
-    {#if success === true}
+    {#if result?.success === true}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 16 16"
@@ -23,7 +24,7 @@
           clip-rule="evenodd"
         />
       </svg>
-    {:else if success === false}
+    {:else if result?.success === false}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 16 16"
@@ -37,10 +38,10 @@
     {/if}
   </div>
 
-  {#if success !== null}
+  {#if result !== null}
     <p>
       <span>{type}</span>
-      <span class="text-gray-400 font-light ml-0.5">{time}ms</span>
+      <span class="text-gray-400 font-light ml-0.5">{result.time}ms</span>
     </p>
   {/if}
 </div>
