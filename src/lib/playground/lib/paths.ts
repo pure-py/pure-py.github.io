@@ -1,8 +1,6 @@
-export const RESERVED_PYODIDE_PATHS = new Set([
-  "parse.py",
-  "check_module.py",
-  "reasons.py",
-]);
+export const PUREPY_DIR = "/__purepy__";
+
+const RESERVED_PREFIX = `${PUREPY_DIR}/`;
 
 const SEGMENT_PATTERN = /^[A-Za-z0-9._-]+$/;
 
@@ -27,7 +25,7 @@ export const validate_filename = (path: string) => {
     );
   }
 
-  if (RESERVED_PYODIDE_PATHS.has(path)) {
+  if (path === PUREPY_DIR || path.startsWith(RESERVED_PREFIX)) {
     throw new Error(`Reserved path: “${path}” is used by PurePy`);
   }
 };

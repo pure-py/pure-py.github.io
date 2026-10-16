@@ -8,7 +8,7 @@
   import Toolbar from "$lib/playground/components/Toolbar.svelte";
   import Toaster, { toast } from "$lib/playground/components/Toaster.svelte";
 
-  import { PurePy } from "$lib/playground/lib/purepy";
+  import { PUREPY_VERSION, PurePy } from "$lib/playground/lib/purepy";
   import { url_with_params_from_state } from "$lib/playground/lib/share";
 
   import { onMount } from "svelte";
@@ -51,7 +51,7 @@
   };
 
   const setup_pyodide = async () => {
-    toast("Loading PurePy …");
+    toast(`Loading PurePy ${PUREPY_VERSION} …`);
 
     try {
       purepy = await PurePy.load();
