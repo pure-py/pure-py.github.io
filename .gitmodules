@@ -1,3 +1,4 @@
 [submodule "pure-py-spec"]
 	path = pure-py-spec
 	url = https://github.com/pure-py/pure-py-spec.git
+	shallow = true
