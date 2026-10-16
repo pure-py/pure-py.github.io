@@ -40,5 +40,5 @@
     "vite-plugin-static-copy": "^4.1.1",
     "zod": "^4.0.0"
   },
-  "packageManager": "yarn@4.17.0"
+  "packageManager": "yarn@4.18.1"
 }
