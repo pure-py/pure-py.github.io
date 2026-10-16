@@ -2,7 +2,7 @@
   import type { Result } from "$lib/playground/lib/app.svelte";
 
   type Props = {
-    type: "Check" | "Evaluate";
+    type: "Check" | "Run";
     result: Result | null;
   };
 
@@ -16,7 +16,8 @@
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 16 16"
         fill="currentColor"
-        class="size-4 text-green-500"
+        class="size-4"
+        style="color: var(--purepy-run-success)"
       >
         <path
           fill-rule="evenodd"
@@ -29,7 +30,8 @@
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 16 16"
         fill="currentColor"
-        class="size-4 text-red-500"
+        class="size-4"
+        style="color: var(--purepy-diagnostic-error)"
       >
         <path
           d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z"

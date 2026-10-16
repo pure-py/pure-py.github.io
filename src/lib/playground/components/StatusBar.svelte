@@ -25,7 +25,7 @@
   </div>
 
   <div class="flex gap-2">
-    <StatusItem type="Evaluate" result={eval_result} />
     <StatusItem type="Check" result={check_result} />
+    <StatusItem type="Run" result={eval_result} />
   </div>
 </div>
