@@ -13,10 +13,7 @@ const output = execSync(
   { encoding: "utf8" },
 );
 
-const latestTag = output
-  .split("\n")
-  .find(Boolean)
-  ?.split("refs/tags/")[1];
+const latestTag = output.split("\n").find(Boolean)?.split("refs/tags/")[1];
 
 if (!latestTag) {
   throw new Error("No tags found in pure-py-spec repository.");
@@ -25,9 +22,7 @@ if (!latestTag) {
 console.log(`Updating ${submodule} to ${latestTag}`);
 
 run(`git submodule update --init --depth 1`);
-run(
-  `git -C ${submodule} fetch origin tag ${latestTag} --no-tags`,
-);
+run(`git -C ${submodule} fetch origin tag ${latestTag} --no-tags`);
 run(`git -C ${submodule} checkout ${latestTag}`);
 
 console.log(`Updated ${submodule} to ${latestTag}`);
