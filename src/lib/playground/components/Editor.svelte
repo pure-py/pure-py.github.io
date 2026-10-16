@@ -76,25 +76,18 @@
           const kept_diagnostics: InlineDiagnostic[] = [];
 
           for (const diagnostic of diagnostics) {
-            const line = transaction.startState.doc.lineAt(diagnostic.from);
-            const invalidation_end = line.to;
-
             let invalidated = false;
 
-            transaction.changes.iterChangedRanges(
-              (from_a, to_a, _from_b, _to_b) => {
-                if (invalidated) return;
+            transaction.changes.iterChangedRanges((from_a, to_a) => {
+              if (invalidated) return;
 
-                const touches_diagnostic_region =
-                  from_a === to_a
-                    ? from_a >= diagnostic.from && from_a <= invalidation_end
-                    : from_a < invalidation_end && to_a > diagnostic.from;
+              const touches_diagnostic_region =
+                from_a <= diagnostic.to && to_a >= diagnostic.from;
 
-                if (touches_diagnostic_region) {
-                  invalidated = true;
-                }
-              },
-            );
+              if (touches_diagnostic_region) {
+                invalidated = true;
+              }
+            });
 
             if (!invalidated) {
               kept_diagnostics.push({

@@ -1,5 +1,6 @@
 import { type NonEmpty } from "$lib/utils/non-empty";
 import { once } from "$lib/utils/once";
+import { SvelteDate } from "svelte/reactivity";
 import { type StaticFile, FileSystem } from "./file.svelte";
 import { PUREPY_TAG, PUREPY_VERSION, type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
@@ -259,7 +260,7 @@ export class State {
 
   save_and_run = () =>
     this.#statefully((purepy) => {
-      const start = new Date();
+      const start = new SvelteDate();
 
       const result = this.#check(purepy);
 
