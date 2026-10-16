@@ -4,3 +4,6 @@ node_modules/
 /.yarn/install-state.gz
 .env
 .env.local
+
+# Local Claude settings
+.claude/settings.local.json
