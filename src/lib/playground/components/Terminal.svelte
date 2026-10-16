@@ -11,8 +11,9 @@
   let terminal: HTMLDivElement | undefined;
 
   $effect(() => {
-    // Read the number of lines so this effect reruns whenever output changes.
-    stdout.lines.length;
+    const line_count = stdout.lines.length;
+
+    if (line_count === 0) return;
 
     requestAnimationFrame(() => {
       terminal?.scrollTo({
