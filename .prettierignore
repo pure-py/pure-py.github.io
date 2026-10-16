@@ -5,5 +5,13 @@ yarn.lock
 bun.lock
 bun.lockb
 
+# Build output and generated files
+build/
+.svelte-kit/
+node_modules/
+
+# Git submodule
+pure-py-spec/
+
 # Miscellaneous
 /static/
