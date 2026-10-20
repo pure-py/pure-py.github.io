@@ -23,9 +23,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Fetch shallow submodule history
-        run: git submodule update --init --depth 1
-
       - name: Verify pure-py-spec is on a tag
         run: |
           git -C pure-py-spec fetch origin --tags --force
