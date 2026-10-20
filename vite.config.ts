@@ -21,7 +21,7 @@ export function viteStaticCopyPyodide() {
           PYODIDE_EXCLUDE,
         ),
         rename: { stripBase: 3 },
-        dest: "_app/immutable/nodes",
+        dest: "pyodide",
       },
     ],
   });

@@ -95,7 +95,10 @@ if "${PUREPY_DIR}" not in sys.path:
 
   static load = async (): Promise<PurePy> => {
     const { loadPyodide } = await import("pyodide");
-    const pyodide = await loadPyodide();
+
+    const pyodide = await loadPyodide({
+      indexURL: `${import.meta.env.BASE_URL}pyodide/`,
+    });
 
     return new PurePy(pyodide);
   };
