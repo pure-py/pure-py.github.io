@@ -6,7 +6,7 @@ The PurePy project site, built with SvelteKit and `adapter-static` (deployed to 
 
 This repository includes the [`pure-py-spec`](https://github.com/pure-py/pure-py-spec) reference type checker as a Git submodule.
 
-After cloning, initialise it and install dependencies with:
+After cloning, initialise the submodule with shallow history and install dependencies:
 
 ```bash
 yarn setup
@@ -15,7 +15,7 @@ yarn setup
 Or run the steps manually:
 
 ```bash
-git submodule update --init --recursive --depth 1
+git submodule update --init --depth 1
 yarn install
 ```
 

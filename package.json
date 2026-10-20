@@ -11,7 +11,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
-    "setup": "git submodule update --init --recursive --depth 1 && yarn install",
+    "setup": "git submodule update --init --depth 1 && yarn install",
     "submodule:update": "node scripts/update-submodule.mjs"
   },
   "devDependencies": {

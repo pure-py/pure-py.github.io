@@ -21,10 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: recursive
+          submodules: true
 
       - name: Fetch shallow submodule history
-        run: git submodule update --init --recursive --depth 1
+        run: git submodule update --init --depth 1
 
       - name: Verify pure-py-spec is on a tag
         run: |
