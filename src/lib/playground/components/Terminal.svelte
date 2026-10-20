@@ -29,7 +29,7 @@
   class="min-h-32 font-mono text-sm p-2 overflow-y-scroll overflow-x-clip"
   style="height: {height}px; min-height: {MIN_HEIGHT}px; max-height: {height}px;"
 >
-  {#each stdout.lines as line, index (`${index}-${line.content}`)}
+  {#each stdout.lines as line, index (index)}
     {#if line.kind === "separator"}
       <div class="my-4 border-t border-zinc-700"></div>
     {:else if line.kind === "header"}
