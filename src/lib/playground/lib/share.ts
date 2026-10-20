@@ -18,4 +18,3 @@ export const url_with_params_from_state = async (
 };
 
 export const params_from_url = (url: URL) => get_encoded_state(url);
-
