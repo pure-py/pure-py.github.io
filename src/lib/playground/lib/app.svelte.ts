@@ -1,4 +1,4 @@
-import { type NonEmpty } from "$lib/utils/non-empty";
+import { to_nonempty, type NonEmpty } from "$lib/utils/non-empty";
 import { once } from "$lib/utils/once";
 import { SvelteDate } from "svelte/reactivity";
 import { type StaticFile, FileSystem } from "./file.svelte";
@@ -68,7 +68,7 @@ export class State {
   }
 
   static default = () => {
-    return new State(example_files as NonEmpty<StaticFile>);
+    return new State(to_nonempty(example_files));
   };
 
   static from = (state: SharableState) => {

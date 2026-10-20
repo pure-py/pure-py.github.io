@@ -17,13 +17,5 @@ export const url_with_params_from_state = async (
   return new_url;
 };
 
-export const params_from_url = (url: URL) => {
-  try {
-    const params = get_encoded_state(url);
-    return params;
-  } catch (error) {
-    // some visual feedback may be nice
-    console.error(error);
-    return null;
-  }
-};
+export const params_from_url = (url: URL) => get_encoded_state(url);
+
