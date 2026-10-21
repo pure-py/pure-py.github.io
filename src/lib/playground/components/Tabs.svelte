@@ -208,7 +208,7 @@
         </div>
 
         <div class="flex justify-end w-6">
-          {#if app.fs.files.length > 1}
+          {#if app.fs.files.length > 1 && renaming_file_index !== index}
             <button
               title="Delete file"
               class="cursor-pointer"
