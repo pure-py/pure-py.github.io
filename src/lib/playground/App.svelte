@@ -51,14 +51,14 @@
   };
 
   const setup_pyodide = async () => {
-    toast(`Loading PurePy ${PUREPY_VERSION} …`);
+    toast(`Loading ${PUREPY_VERSION} …`);
 
     try {
       purepy = await PurePy.load();
       purepy.attach_stdout(app.stdout);
       app.register_purepy(purepy);
 
-      toast("PurePy is ready—press", "success", {
+      toast("Ready—press", "success", {
         keys: ["⌘S"],
         action: "or use the button above to run",
       });
@@ -66,7 +66,7 @@
       console.error(error);
 
       toast(
-        error instanceof Error ? error.message : "Could not load PurePy",
+        error instanceof Error ? error.message : "Unexpected load error",
         "error",
       );
     }

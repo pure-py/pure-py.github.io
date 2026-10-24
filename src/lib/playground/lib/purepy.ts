@@ -31,7 +31,7 @@ const checker_files = Object.fromEntries(
 const version_match = pyproject_toml.match(/^version\s*=\s*"([^"]+)"/m);
 
 if (version_match === null) {
-  throw new Error("Could not read PurePy version from pyproject.toml");
+  throw new Error("Could not read version from pyproject.toml");
 }
 
 const purepy_version = version_match[1];
