@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { LayoutProps } from "./$types";
   import "$lib/styles.css";
-  import { headerLinks } from "$lib/config/nav";
 
   let { children, data }: LayoutProps = $props();
 </script>
@@ -22,9 +21,10 @@
     ><img class="brand-logo" src={data.config.logo} alt={data.config.name} /></a
   >
   <nav class="site-nav">
-    {#each headerLinks as { url, title } (url)}
-      <a href={url}>{title}</a>
-    {/each}
+    <a href="/#overview">Overview</a>
+    <a href="/#features">Features</a>
+    <a href={data.config.spec} target="_blank">Spec</a>
+    <a href={data.config.github} target="_blank">GitHub</a>
   </nav>
 </header>
 
@@ -36,8 +36,8 @@
   <div class="footer-inner">
     <p>© {data.config.name} contributors</p>
     <nav>
-      <a href={data.config.github}>GitHub</a>
-      <a href={data.config.spec}>Specification (PDF)</a>
+      <a href={data.config.github} target="_blank">GitHub</a>
+      <a href={data.config.spec} target="_blank">Specification (PDF)</a>
     </nav>
   </div>
 </footer>
