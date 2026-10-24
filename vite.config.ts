@@ -1,7 +1,7 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, URL } from "url";
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
@@ -21,7 +21,7 @@ export function viteStaticCopyPyodide() {
           PYODIDE_EXCLUDE,
         ),
         rename: { stripBase: 3 },
-        dest: "_app/immutable/nodes",
+        dest: "pyodide",
       },
     ],
   });
@@ -29,5 +29,10 @@ export function viteStaticCopyPyodide() {
 
 export default defineConfig({
   optimizeDeps: { exclude: ["pyodide"] },
+  resolve: {
+    alias: {
+      "pure-py-spec": fileURLToPath(new URL("./pure-py-spec", import.meta.url)),
+    },
+  },
   plugins: [tailwindcss(), sveltekit(), viteStaticCopyPyodide()],
 });

@@ -19,6 +19,11 @@
     node.focus();
   }
 
+  const error_count = (path: string) =>
+    app.diagnostics.filter(
+      (diagnostic) => diagnostic.file === path && diagnostic.line !== null,
+    ).length;
+
   const show_error_once = (
     message: string,
     last_error: string | null,
@@ -70,15 +75,9 @@
         (message) => (last_create_error = message),
       );
 
-      if (app.fs.files.some((file) => file.path === name)) {
-        new_file_name = "";
-        new_file_prompt = false;
-        last_create_error = null;
-      } else {
-        requestAnimationFrame(() => {
-          new_file_input?.focus();
-        });
-      }
+      requestAnimationFrame(() => {
+        new_file_input?.focus();
+      });
     } finally {
       creating_file = false;
     }
@@ -147,14 +146,37 @@
   const path_segments = (path: string) => path.split("/");
 </script>
 
-{#snippet file_path(path: string, inactive: boolean)}
-  {#each path_segments(path) as segment, segment_index (`${segment_index}-${segment}`)}
-    {#if segment_index > 0}
-      <span class={inactive ? "text-zinc-600" : "text-zinc-500"}>/</span>
-    {/if}
+{#snippet file_path(
+  path: string,
+  inactive: boolean,
+  unsaved: boolean,
+  has_errors: boolean,
+)}
+  <div class="inline-flex items-baseline gap-x-1.5">
+    <div class="size-2">
+      {#if unsaved}
+        <div class="size-full rounded-full bg-white"></div>
+      {/if}
+    </div>
 
-    <span>{segment}</span>
-  {/each}
+    <div class="inline-flex items-baseline gap-x-0.5">
+      {#each path_segments(path) as segment, segment_index (`${segment_index}-${segment}`)}
+        {#if segment_index > 0}
+          <span class={inactive ? "text-zinc-600" : "text-zinc-500"}>/</span>
+        {/if}
+
+        <span
+          class={[
+            has_errors &&
+              segment_index === path_segments(path).length - 1 &&
+              "cm-diagnostic-underline",
+          ]}
+        >
+          {segment}
+        </span>
+      {/each}
+    </div>
+  </div>
 {/snippet}
 
 <div class="h-8 flex w-full">
@@ -163,13 +185,7 @@
       <div
         class="px-1.5 gap-2 flex items-center text-sm rounded-t-md bg-[#282c34] text-white border border-t-zinc-500 border-x-zinc-500 border-b-transparent"
       >
-        <div class="inline-flex items-baseline gap-x-1.5 pb-0.5">
-          <div class="size-2">
-            {#if file.dirty}
-              <div class="size-full rounded-full bg-white"></div>
-            {/if}
-          </div>
-
+        <div class="inline-flex items-baseline pb-0.5">
           {#if renaming_file_index === index}
             <input
               type="text"
@@ -183,16 +199,16 @@
             <button
               type="button"
               title="Double-click to rename"
-              class="cursor-text inline-flex items-baseline gap-x-0.5"
+              class="cursor-text inline-flex items-baseline"
               ondblclick={() => start_rename(index, file.path)}
             >
-              {@render file_path(file.path, false)}
+              {@render file_path(file.path, false, file.dirty, false)}
             </button>
           {/if}
         </div>
 
         <div class="flex justify-end w-6">
-          {#if app.fs.files.length > 1}
+          {#if app.fs.files.length > 1 && renaming_file_index !== index}
             <button
               title="Delete file"
               class="cursor-pointer"
@@ -224,16 +240,20 @@
         }}
         class="px-1.5 gap-2 flex justify-center items-center text-sm cursor-pointer rounded-t-md bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300 border border-t-transparent border-x-transparent border-b-zinc-500"
       >
-        <div class="inline-flex items-baseline gap-x-1.5 pb-0.5">
-          <div class="size-2">
-            {#if file.dirty}
-              <div class="size-full rounded-full bg-white"></div>
-            {/if}
-          </div>
-
-          <div class="inline-flex items-baseline gap-x-0.5">
-            {@render file_path(file.path, true)}
-          </div>
+        <div
+          class="inline-flex items-baseline pb-0.5"
+          title={error_count(file.path) > 0
+            ? `${error_count(file.path)} error${
+                error_count(file.path) === 1 ? "" : "s"
+              }`
+            : undefined}
+        >
+          {@render file_path(
+            file.path,
+            true,
+            file.dirty,
+            error_count(file.path) > 0,
+          )}
         </div>
 
         <div class="flex items-center justify-end w-6"></div>
