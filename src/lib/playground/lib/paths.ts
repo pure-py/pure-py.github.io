@@ -26,6 +26,6 @@ export const validate_filename = (path: string) => {
   }
 
   if (path === PUREPY_DIR || path.startsWith(RESERVED_PREFIX)) {
-    throw new Error(`Reserved path: “${path}” is used by PurePy`);
+    throw new Error(`Reserved path: “${path}”`);
   }
 };

@@ -207,7 +207,7 @@ export class State {
         col: error.col,
       };
 
-      console.error("PurePy check failed:", structured_error);
+      console.error("Check failed:", structured_error);
       console.error(JSON.stringify(structured_error));
     }
 

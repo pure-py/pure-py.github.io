@@ -21,7 +21,7 @@
       />
     </svg>
 
-    <p>PurePy</p></ToolbarLink
+    <p>Home</p></ToolbarLink
   >
 
   <span class="ml-auto"></span>
