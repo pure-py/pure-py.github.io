@@ -14,18 +14,26 @@
   import { onMount } from "svelte";
   import Tabs from "./components/Tabs.svelte";
   import { State } from "./lib/app.svelte";
+  import { once_promise } from "#lib/utils/once.ts";
 
-  let { app }: { app: State } = $props();
+  let { app, is_embed = false }: { app: State; is_embed: boolean } = $props();
+
+  // svelte-ignore state_referenced_locally
+  let show_terminal = $state(!is_embed);
+  // svelte-ignore state_referenced_locally
+  let show_tabs = $state(!is_embed); // maybe show if embed has multiple files?
 
   let container: HTMLDivElement;
 
   const TOOLBAR_HEIGHT = 72;
   const STATUS_BAR_HEIGHT = 24 + 1; // status bar + dragger
-  const DEFAULT_TERMINAL_HEIGHT = 128;
 
   let available_height = $state(0); // binds to container.clientHeight
-  let toolbar_height = $state(TOOLBAR_HEIGHT);
-  let terminal_height = $state(DEFAULT_TERMINAL_HEIGHT + STATUS_BAR_HEIGHT);
+  let toolbar_height = $derived(is_embed ? 0 : TOOLBAR_HEIGHT);
+  let default_terminal_height = $derived(is_embed ? 64 : 128);
+  let terminal_height = $derived(
+    show_terminal ? default_terminal_height + STATUS_BAR_HEIGHT : 0,
+  );
   let editor_height = $derived(
     Math.max(available_height - toolbar_height - terminal_height, 0),
   );
@@ -33,7 +41,10 @@
   const adjust_height = (y: number) => {
     const total_height = container.offsetTop + container.clientHeight;
     const relative_height = total_height - y;
-    terminal_height = Math.max(relative_height, STATUS_BAR_HEIGHT);
+    terminal_height = Math.max(
+      relative_height,
+      show_terminal ? STATUS_BAR_HEIGHT : 0,
+    );
   };
 
   // let stdout = new Stdout();
@@ -67,7 +78,7 @@
     await editor.ready;
   };
 
-  const setup_pyodide = async () => {
+  const setup_pyodide = once_promise(async () => {
     toast(`Loading ${PUREPY_VERSION} …`);
 
     try {
@@ -87,17 +98,36 @@
         "error",
       );
     }
-  };
+  });
 
   onMount(async () => {
-    await Promise.all([setup_codemirror(), setup_pyodide()]);
+    if (is_embed) {
+      await setup_codemirror();
+    } else {
+      await Promise.all([setup_codemirror(), setup_pyodide()]);
+    }
   });
+
+  const unembed_intent = async () => {
+    show_terminal = true;
+    await setup_pyodide();
+  };
 
   const onkeydown = (event: KeyboardEvent) => {
     if ((event.ctrlKey || event.metaKey) && event.key === "s") {
       event.preventDefault();
-      app.save_and_run();
+      run();
     }
+  };
+
+  const check = async () => {
+    unembed_intent();
+    app.save_and_check();
+  };
+
+  const run = async () => {
+    unembed_intent();
+    app.save_and_run();
   };
 </script>
 
@@ -107,17 +137,20 @@
 <div
   bind:this={container}
   bind:clientHeight={available_height}
-  class="w-full min-h-full h-full max-h-full flex flex-col"
+  class="relative w-full min-h-full h-full max-h-full flex flex-col bg-zinc-900"
 >
   <!-- Toolbar (TOOLBAR_HEIGHT) -->
   <div class="flex flex-col">
     <Toolbar
       {share}
-      check={app.save_and_check}
-      run={app.save_and_run}
-      is_busy={app.busy}
+      {check}
+      {run}
+      {is_embed}
+      is_busy={is_embed ? false : app.busy}
     />
-    <Tabs {app} />
+    {#if show_tabs}
+      <Tabs {app} />
+    {/if}
   </div>
 
   <!-- Editor (editor_height) -->
@@ -125,18 +158,20 @@
     <CodeMirror bind:this={editor} {app} />
   </div>
 
-  <!-- Status Bar + Terminal (terminal_height) -->
-  <div class="flex flex-col" style="height: {terminal_height}px">
-    <!-- Status Bar (STATUS_BAR_HEIGHT) -->
-    <TerminalDragger {adjust_height} />
-    <StatusBar
-      dirty={app.fs.dirty}
-      check_result={app.check_result}
-      eval_result={app.eval_result}
-    />
-    <!-- Terminal -->
-    <Terminal stdout={app.stdout} />
-  </div>
+  {#if show_terminal}
+    <!-- Status Bar + Terminal (terminal_height) -->
+    <div class="flex flex-col" style="height: {terminal_height}px">
+      <!-- Status Bar (STATUS_BAR_HEIGHT) -->
+      <TerminalDragger {adjust_height} />
+      <StatusBar
+        dirty={app.fs.dirty}
+        check_result={app.check_result}
+        eval_result={app.eval_result}
+      />
+      <!-- Terminal -->
+      <Terminal stdout={app.stdout} />
+    </div>
+  {/if}
 
   <Toaster />
 </div>

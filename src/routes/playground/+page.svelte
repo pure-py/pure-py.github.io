@@ -67,7 +67,7 @@
       Loading playground …
     </div>
   {:then app}
-    <Playground {app} />
+    <Playground {app} is_embed={false} />
   {:catch error}
     <div
       class="flex h-full flex-col items-center justify-center gap-4 px-6 text-center text-zinc-400"

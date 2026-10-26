@@ -1,6 +1,26 @@
 <script lang="ts">
+  import App from "#lib/playground/App.svelte";
+  import { State } from "#lib/playground/lib/app.svelte.ts";
   import type { PageProps } from "./$types";
   let { data }: PageProps = $props();
+
+  const example = `from dataclasses import dataclass
+from typing import Any
+
+@dataclass
+class Point:
+    x: Any
+    y: Any
+
+def describe(p):
+    match p:
+        case Point(0, 0):
+            return "origin"
+        case Point(x, y):
+            return "point"
+
+print(describe(Point(3, 4)))
+`;
 </script>
 
 <section id="top" class="hero">
@@ -37,37 +57,13 @@
   </p>
 </section>
 
-<section class="code-sample">
-  <pre><code
-      ><span class="tok-kw">from</span> dataclasses <span class="tok-kw"
-        >import</span
-      > dataclass
-<span class="tok-kw">from</span> typing <span class="tok-kw">import</span> <span
-        class="tok-type">Any</span
-      >
-
-<span class="tok-decorator">@dataclass</span>
-<span class="tok-kw">class</span> <span class="tok-class">Point</span>:
-    x: <span class="tok-type">Any</span>
-    y: <span class="tok-type">Any</span>
-
-<span class="tok-kw">def</span> <span class="tok-fn">describe</span>(p):
-    <span class="tok-kw">match</span> p:
-        <span class="tok-kw">case</span> <span class="tok-class">Point</span
-      >(<span class="tok-num">0</span>, <span class="tok-num">0</span>):
-            <span class="tok-kw">return</span> <span class="tok-str"
-        >"origin"</span
-      >
-        <span class="tok-kw">case</span> <span class="tok-class">Point</span
-      >(x, y):
-            <span class="tok-kw">return</span> <span class="tok-str"
-        >"point"</span
-      >
-
-<span class="tok-builtin">print</span>(<span class="tok-fn">describe</span
-      >(<span class="tok-class">Point</span>(<span class="tok-num">3</span
-      >, <span class="tok-num">4</span>)))</code
-    ></pre>
+<section>
+  <div class="h-96 max-h-96">
+    <App
+      app={State.from({ files: [{ path: "main.py", data: example }] })}
+      is_embed={true}
+    />
+  </div>
 </section>
 
 <section id="features" class="features">
