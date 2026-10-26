@@ -57,11 +57,12 @@
       const state = app.serialise();
       const url = await url_with_params_from_state(page.url, state);
 
-      // update the url without reloading page
-      const update_url = goto(url);
-      const copy_to_clipboard = navigator.clipboard.writeText(url.toString());
+      await navigator.clipboard.writeText(url.toString());
 
-      await Promise.all([update_url, copy_to_clipboard]);
+      if (!is_embed) {
+        // update the url without reloading page
+        await goto(url);
+      }
 
       toast("Share link copied to clipboard");
     } catch (error) {

@@ -12,8 +12,9 @@ export const url_with_params_from_state = async (
   url: ReadonlyURL,
   state: SharableState,
 ) => {
-  const new_url = new URL(url.toString());
   const encoded = await encode_state(state);
+  const new_url = new URL(url.origin);
+  new_url.pathname = "/playground";
   new_url.hash = encoded_state_to_url_hash(encoded);
   return new_url;
 };
