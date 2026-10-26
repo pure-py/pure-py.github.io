@@ -41,8 +41,6 @@ export default defineConfig({
     sveltekit({
       preprocess: vitePreprocess(),
       adapter: adapter(),
-      paths: { base: process.env.BASE_PATH ?? "" },
-      experimental: { explicitEnvironmentVariables: true },
     }),
     viteStaticCopyPyodide(),
   ],
