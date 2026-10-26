@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "dev:anonymous": "ANONYMOUS=true vite dev",
     "build": "vite build",
+    "build:anonymous": "ANONYMOUS=true vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -19,7 +21,7 @@
     "@codemirror/theme-one-dark": "^6.1.3",
     "@eslint/js": "^10.0.1",
     "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.49.1",
+    "@sveltejs/kit": "^2.70.3",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24",
@@ -38,7 +40,7 @@
     "typescript-eslint": "^8.60.1",
     "vite": "^7.2.6",
     "vite-plugin-static-copy": "^4.1.1",
-    "zod": "^4.0.0"
+    "zod": "^4.5.4"
   },
   "packageManager": "yarn@4.18.1"
 }
