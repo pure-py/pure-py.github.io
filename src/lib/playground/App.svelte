@@ -1,15 +1,15 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import CodeMirror from "$lib/playground/components/Editor.svelte";
-  import StatusBar from "$lib/playground/components/StatusBar.svelte";
-  import Terminal from "$lib/playground/components/Terminal.svelte";
-  import TerminalDragger from "$lib/playground/components/TerminalDragger.svelte";
-  import Toolbar from "$lib/playground/components/Toolbar.svelte";
-  import Toaster, { toast } from "$lib/playground/components/Toaster.svelte";
+  import CodeMirror from "#lib/playground/components/Editor.svelte";
+  import StatusBar from "#lib/playground/components/StatusBar.svelte";
+  import Terminal from "#lib/playground/components/Terminal.svelte";
+  import TerminalDragger from "#lib/playground/components/TerminalDragger.svelte";
+  import Toolbar from "#lib/playground/components/Toolbar.svelte";
+  import Toaster, { toast } from "#lib/playground/components/Toaster.svelte";
 
-  import { PUREPY_VERSION, PurePy } from "$lib/playground/lib/purepy";
-  import { url_with_params_from_state } from "$lib/playground/lib/share";
+  import { PUREPY_VERSION, PurePy } from "#lib/playground/lib/purepy.js";
+  import { url_with_params_from_state } from "#lib/playground/lib/share.js";
 
   import { onMount } from "svelte";
   import Tabs from "./components/Tabs.svelte";

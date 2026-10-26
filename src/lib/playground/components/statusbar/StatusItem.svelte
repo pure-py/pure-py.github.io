@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Result } from "$lib/playground/lib/app.svelte";
+  import type { Result } from "#lib/playground/lib/app.svelte.js";
 
   type Props = {
     type: "Check" | "Run";

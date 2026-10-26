@@ -1,3 +1,5 @@
+import adapter from "@sveltejs/adapter-static";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { dirname, join } from "path";
@@ -34,5 +36,14 @@ export default defineConfig({
       "pure-py-spec": fileURLToPath(new URL("./pure-py-spec", import.meta.url)),
     },
   },
-  plugins: [tailwindcss(), sveltekit(), viteStaticCopyPyodide()],
+  plugins: [
+    tailwindcss(),
+    sveltekit({
+      preprocess: vitePreprocess(),
+      adapter: adapter(),
+      paths: { base: process.env.BASE_PATH ?? "" },
+      experimental: { explicitEnvironmentVariables: true },
+    }),
+    viteStaticCopyPyodide(),
+  ],
 });

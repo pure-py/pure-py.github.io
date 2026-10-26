@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Stdout } from "$lib/playground/lib/stdout.svelte";
+  import { type Stdout } from "#lib/playground/lib/stdout.svelte.js";
 
   type Props = { terminalHeight: number | undefined; stdout: Stdout };
   let { terminalHeight, stdout }: Props = $props();

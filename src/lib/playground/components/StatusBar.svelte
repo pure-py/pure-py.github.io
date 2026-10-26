@@ -1,5 +1,5 @@
 <script lang="ts">
-  import StatusItem from "$lib/playground/components/statusbar/StatusItem.svelte";
+  import StatusItem from "#lib/playground/components/statusbar/StatusItem.svelte";
   import type { Result } from "../lib/app.svelte";
 
   type Props = {
