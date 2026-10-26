@@ -1,6 +1,6 @@
 import * as z from "zod/mini";
 
-export type ConformanceTestPath = {
+export type ConformanceTest = {
   level: Level;
   python_outcome: PythonOutcome;
   purepy_outcome: PurePyOutcome;

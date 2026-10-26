@@ -1,52 +1,91 @@
+import { parse_path } from "#lib/conformance/path.ts";
 import type { StaticFile } from "#lib/playground/lib/file.svelte.ts";
-import { type NonEmpty } from "#lib/utils/non-empty.ts";
+import { nonempty_map, type NonEmpty } from "#lib/utils/non-empty.ts";
 import { read } from "$app/server";
 
-const normalise = (key: string) => {
-  const file = key.slice(2); // remove leading `./`
+const name_from_parts = (parts: string[], prefix: string[] = []): string => {
+  if (parts.length === 0) {
+    throw new Error("never");
+  }
 
-  const [level, python_outcome, purepy_outcome, name_w_ext, ...rest] =
-    file.split("/");
+  const [part, ...rest] = parts!;
 
-  const [name] = name_w_ext.split(".");
+  if (rest.length === 0) {
+    if (part === "main.py") {
+      return prefix.join("/"); // we already have the name
+    }
 
-  return {
-    test_name: `${level}/${python_outcome}/${purepy_outcome}/${name}`,
-    file_name: rest.length ? rest.join("/") : name_w_ext,
-  };
+    const name = part.slice(0, -3); // without trailing `.py`
+    return [...prefix, name].join("/");
+  }
+
+  return name_from_parts(rest, [...prefix, part]);
 };
 
-const best_safe_index = (files: NonEmpty<StaticFile>) => {
-  if (files.length === 1) {
-    return 0;
+const parse_test_root = (path: string) => {
+  if (path.startsWith("./")) {
+    path = path.slice(2);
   }
-  const main_index = files.findIndex((file) => file.path === "main.py");
-  return main_index === -1 ? 0 : main_index;
+  const [level, python_outcome, purepy_outcome, ...rest] = parse_path(path);
+  const name = name_from_parts(rest);
+  const key = `${level}/${python_outcome}/${purepy_outcome}/${name}`;
+  return { level, python_outcome, purepy_outcome, name, key };
 };
 
 export const build_registry = async (records: Record<string, string>) => {
   const registry: Record<string, NonEmpty<StaticFile>> = {};
-  for (const key in records) {
+  const paths = Object.keys(records);
+
+  for (const path of paths) {
     // the structure of this one is a bit different and
     // needs special handling
-    if (key.includes("syntactic-only")) {
+    if (path.includes("syntactic-only")) {
       continue;
     }
 
-    // for now we will ignore .expected etc, but keep
-    // them close by
-    if (!key.endsWith(".py")) {
-      continue;
+    if (path.startsWith("./module-level")) {
+      if (!path.endsWith(".py")) {
+        continue;
+      }
+      const root = parse_test_root(path);
+      const content = await read(records[path]).text();
+      const file = {
+        path: root.name + ".py",
+        data: content,
+      } as const;
+
+      console.log(root);
+      registry[root.key] = [file] as const;
     }
 
-    const { test_name, file_name } = normalise(key);
-    const files = registry[test_name] ?? [];
-    const content = await read(records[key]).text();
-    const file = {
-      path: file_name,
-      data: content,
-    } as const;
-    registry[test_name] = [...files, file];
+    if (path.startsWith("./program-level")) {
+      if (!path.endsWith("main.py")) {
+        continue;
+      }
+      const root = parse_test_root(path);
+
+      const prefix = `./${root.key}`;
+
+      const related = paths.filter((other) => {
+        return (
+          other.startsWith(`./${root.key}`) &&
+          other.endsWith(".py") &&
+          other !== path
+        );
+      });
+
+      const files = await Promise.all(
+        nonempty_map([path, ...related], async (path) => {
+          const content = await read(records[path]).text();
+          return {
+            path: path.slice(prefix.length + 1),
+            data: content,
+          } as const;
+        }),
+      );
+
+      registry[root.key] = files;
+    }
   }
 
   return {
@@ -55,8 +94,7 @@ export const build_registry = async (records: Record<string, string>) => {
       if (files === undefined) {
         return null;
       }
-      const active_index = best_safe_index(files);
-      return { files, active_index };
+      return files;
     },
   };
 };
