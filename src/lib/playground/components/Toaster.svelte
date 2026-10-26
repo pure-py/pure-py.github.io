@@ -1,5 +1,5 @@
 <script module lang="ts">
-  import Kbd from "$lib/playground/components/toolbar/Kbd.svelte";
+  import Kbd from "#lib/playground/components/toolbar/Kbd.svelte";
 
   export type Toast = {
     id: number;

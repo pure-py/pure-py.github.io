@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import Playground from "$lib/playground/App.svelte";
-  import { State } from "$lib/playground/lib/app.svelte";
-  import { params_from_url } from "$lib/playground/lib/share";
+  import Playground from "#lib/playground/App.svelte";
+  import { State } from "#lib/playground/lib/app.svelte.js";
+  import { params_from_url } from "#lib/playground/lib/share.js";
   import {
     decode_state,
     type EncodedState,
-  } from "$lib/playground/lib/share/codec";
+  } from "#lib/playground/lib/share/codec.js";
   import { onMount } from "svelte";
 
   // we have to do this ugly pattern because we need to avoid

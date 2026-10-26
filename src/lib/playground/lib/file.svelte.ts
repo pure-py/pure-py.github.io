@@ -1,5 +1,5 @@
 import { validate_filename } from "./paths";
-import { nonempty_map, type NonEmpty } from "$lib/utils/non-empty";
+import { nonempty_map, type NonEmpty } from "#lib/utils/non-empty.js";
 
 export type StaticFile = {
   readonly path: string;

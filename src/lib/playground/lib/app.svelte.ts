@@ -1,12 +1,12 @@
-import { to_nonempty, type NonEmpty } from "$lib/utils/non-empty";
-import { once } from "$lib/utils/once";
+import { to_nonempty, type NonEmpty } from "#lib/utils/non-empty.js";
+import { once } from "#lib/utils/once.js";
 import { SvelteDate } from "svelte/reactivity";
 import { type StaticFile, FileSystem } from "./file.svelte";
 import { PUREPY_TAG, PUREPY_VERSION, type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
 
-const example_sources = import.meta.glob("$lib/assets/examples/**/*.py", {
+const example_sources = import.meta.glob("#lib/assets/examples/**/*.py", {
   query: "?raw",
   import: "default",
   eager: true,

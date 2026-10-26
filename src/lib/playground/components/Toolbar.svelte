@@ -1,7 +1,7 @@
 <script>
-  import Kbd from "$lib/playground/components/toolbar/Kbd.svelte";
-  import ToolbarButton from "$lib/playground/components/toolbar/ToolbarButton.svelte";
-  import ToolbarLink from "$lib/playground/components/toolbar/ToolbarLink.svelte";
+  import Kbd from "#lib/playground/components/toolbar/Kbd.svelte";
+  import ToolbarButton from "#lib/playground/components/toolbar/ToolbarButton.svelte";
+  import ToolbarLink from "#lib/playground/components/toolbar/ToolbarLink.svelte";
 
   let { share, check, run, is_busy } = $props();
 </script>

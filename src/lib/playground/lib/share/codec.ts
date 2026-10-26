@@ -17,6 +17,7 @@
 // Breaking changes can occur both in the state data object and in the
 // encoding format.
 
+import type { ReadonlyURL } from "$app/state";
 import { z } from "zod/mini";
 
 import {
@@ -54,15 +55,10 @@ export const SharableState = z.object({
   active: z.optional(z.int().check(z.nonnegative())),
 });
 
-export const set_encoded_state = (
-  url: URL,
-  payload: Uint8Array<ArrayBuffer>,
-) => {
-  url = new URL(url);
+export const encoded_state_to_url_hash = (payload: Uint8Array<ArrayBuffer>) => {
   const versioned_bytes = prepend_version(VERSION, payload);
   const encoded = bytes_to_url(versioned_bytes);
-  url.hash = `#share=${encoded}`;
-  return url;
+  return `#share=${encoded}`;
 };
 
 export const encode_state = async (state: SharableState) => {
@@ -74,7 +70,7 @@ export const encode_state = async (state: SharableState) => {
 };
 
 // this part is sacred and cannot change
-export const get_encoded_state = (url: URL) => {
+export const get_encoded_state = (url: ReadonlyURL) => {
   if (url.hash === "") {
     return null;
   }
