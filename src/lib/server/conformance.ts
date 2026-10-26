@@ -96,5 +96,8 @@ export const build_registry = async (records: Record<string, string>) => {
       }
       return files;
     },
+    list: () => {
+      return Object.keys(registry);
+    },
   };
 };
