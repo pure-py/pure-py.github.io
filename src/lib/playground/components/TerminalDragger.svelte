@@ -1,6 +1,6 @@
 <script lang="ts">
-  type Props = { ondrag: (client_y: number) => void };
-  let { ondrag }: Props = $props();
+  type Props = { adjust_height: (y: number) => void };
+  let { adjust_height }: Props = $props();
 
   // when the dragger is clicked, we register an event listener for mouse movement,
   // in order to extract the y position of the mouse. when the click is released
@@ -10,7 +10,9 @@
   // be more approrpriate and cover both.
   //
   const onmousedown = () => {
-    const onmousemove = ({ clientY }: MouseEvent) => ondrag(clientY);
+    const onmousemove = (event: MouseEvent) => {
+      adjust_height(window.scrollY + event.clientY);
+    };
 
     const onmouseup = () => {
       window.removeEventListener("mouseup", onmouseup);

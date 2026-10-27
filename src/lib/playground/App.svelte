@@ -17,20 +17,23 @@
 
   let { app }: { app: State } = $props();
 
+  let container: HTMLDivElement;
+
   const TOOLBAR_HEIGHT = 72;
   const STATUS_BAR_HEIGHT = 24 + 1; // status bar + dragger
   const DEFAULT_TERMINAL_HEIGHT = 128;
 
-  let available_height = $state(0); // bind to window.innerHeight
+  let available_height = $state(0); // binds to container.clientHeight
   let toolbar_height = $state(TOOLBAR_HEIGHT);
   let terminal_height = $state(DEFAULT_TERMINAL_HEIGHT + STATUS_BAR_HEIGHT);
   let editor_height = $derived(
     Math.max(available_height - toolbar_height - terminal_height, 0),
   );
 
-  const adjust_height = (client_y: number) => {
-    const proposed_height = available_height - client_y;
-    terminal_height = Math.max(proposed_height, STATUS_BAR_HEIGHT);
+  const adjust_height = (y: number) => {
+    const total_height = container.offsetTop + container.clientHeight;
+    const relative_height = total_height - y;
+    terminal_height = Math.max(relative_height, STATUS_BAR_HEIGHT);
   };
 
   // let stdout = new Stdout();
@@ -102,6 +105,7 @@
 
 <!-- Toolbar + Editor + Status Bar + Terminal (available_height) -->
 <div
+  bind:this={container}
   bind:clientHeight={available_height}
   class="w-full min-h-full h-full max-h-full flex flex-col"
 >
@@ -124,7 +128,7 @@
   <!-- Status Bar + Terminal (terminal_height) -->
   <div class="flex flex-col" style="height: {terminal_height}px">
     <!-- Status Bar (STATUS_BAR_HEIGHT) -->
-    <TerminalDragger ondrag={adjust_height} />
+    <TerminalDragger {adjust_height} />
     <StatusBar
       dirty={app.fs.dirty}
       check_result={app.check_result}
