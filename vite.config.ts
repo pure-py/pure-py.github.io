@@ -1,6 +1,47 @@
+import adapter from "@sveltejs/adapter-static";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
+import { dirname, join } from "path";
+import { fileURLToPath, URL } from "url";
 import { defineConfig } from "vite";
+import { viteStaticCopy } from "vite-plugin-static-copy";
+
+const PYODIDE_EXCLUDE = [
+  "!**/*.{md,html}",
+  "!**/*.d.ts",
+  "!**/*.whl",
+  "!**/pyodide/node_modules",
+];
+
+export function viteStaticCopyPyodide() {
+  const pyodideDir = dirname(fileURLToPath(import.meta.resolve("pyodide")));
+  return viteStaticCopy({
+    targets: [
+      {
+        src: [join(pyodideDir, "*").replace(/\\/g, "/")].concat(
+          PYODIDE_EXCLUDE,
+        ),
+        rename: { stripBase: 3 },
+        dest: "pyodide",
+      },
+    ],
+  });
+}
 
 export default defineConfig({
-  plugins: [sveltekit()],
+  optimizeDeps: { exclude: ["pyodide"] },
+  resolve: {
+    alias: {
+      "pure-py-spec": fileURLToPath(new URL("./pure-py-spec", import.meta.url)),
+    },
+  },
+  plugins: [
+    tailwindcss(),
+    sveltekit({
+      preprocess: vitePreprocess(),
+      adapter: adapter(),
+    }),
+    viteStaticCopyPyodide(),
+  ],
 });

@@ -1,0 +1,20 @@
+:root {
+  --purepy-diagnostic-error: #f44747;
+  --purepy-run-success: var(--color-green-500);
+}
+
+/* Playground diagnostics */
+.cm-diagnostic-underline {
+  text-decoration: underline wavy var(--purepy-diagnostic-error);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.cm-inline-diagnostic {
+  margin-left: 2rem;
+  color: var(--purepy-diagnostic-error);
+  font-size: 1em;
+  font-style: italic;
+  white-space: pre;
+  user-select: none;
+}
