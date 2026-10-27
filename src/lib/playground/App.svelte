@@ -30,9 +30,9 @@
     Math.max(available_height - toolbar_height - terminal_height, 0),
   );
 
-  const adjust_height = (y: number) => {
-    const total_height = container.offsetTop + container.clientHeight;
-    const relative_height = total_height - y;
+  const adjust_height = (client_y: number) => {
+    const total_height = container.getBoundingClientRect().bottom;
+    const relative_height = total_height - client_y;
     terminal_height = Math.max(relative_height, STATUS_BAR_HEIGHT);
   };
 

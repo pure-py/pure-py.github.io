@@ -11,7 +11,7 @@
   //
   const onmousedown = () => {
     const onmousemove = (event: MouseEvent) => {
-      adjust_height(window.scrollY + event.clientY);
+      adjust_height(event.clientY);
     };
 
     const onmouseup = () => {
