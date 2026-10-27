@@ -1,8 +1,6 @@
 <script lang="ts">
-  type Props = { setHeight: (height: number) => void };
-  let { setHeight }: Props = $props();
-
-  let availableHeight: number | undefined = $state();
+  type Props = { ondrag: (client_y: number) => void };
+  let { ondrag }: Props = $props();
 
   // when the dragger is clicked, we register an event listener for mouse movement,
   // in order to extract the y position of the mouse. when the click is released
@@ -12,28 +10,7 @@
   // be more approrpriate and cover both.
   //
   const onmousedown = () => {
-    const onmousemove = ({ clientY }: MouseEvent) => {
-      if (availableHeight === undefined) {
-        return;
-      }
-
-      // the height of the window, offset by the mouse y position,
-      // minus the height of this dragger element itself, minus
-      // the statusbar height
-      const proposedHeight = availableHeight - clientY - 24;
-
-      // these aren't strictly necessary, but it will make it easier
-      // to not break anything here
-      const minHeight = 128;
-      const maxHeight = (availableHeight / 3) * 2;
-
-      const boundedHeight = Math.max(
-        minHeight,
-        Math.min(maxHeight, proposedHeight),
-      );
-
-      setHeight(boundedHeight);
-    };
+    const onmousemove = ({ clientY }: MouseEvent) => ondrag(clientY);
 
     const onmouseup = () => {
       window.removeEventListener("mouseup", onmouseup);
@@ -45,12 +22,10 @@
   };
 </script>
 
-<svelte:window bind:innerHeight={availableHeight} />
-
 <button
   {onmousedown}
   aria-label="Resize terminal"
-  class="h-px bg-gray-700 hover:bg-gray-600 active:bg-blue-900 flex justify-center items-center cursor-ns-resize group"
+  class="h-px bg-gray-700 hover:bg-gray-600 active:bg-blue-900 flex justify-center items-center cursor-ns-resize group shrink-0"
 >
   <div class=" z-10 w-full flex justify-center">
     <div

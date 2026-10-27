@@ -17,7 +17,21 @@
 
   let { app }: { app: State } = $props();
 
-  let terminalHeight: number | undefined = $state(undefined);
+  const TOOLBAR_HEIGHT = 72;
+  const STATUS_BAR_HEIGHT = 24 + 1; // status bar + dragger
+  const DEFAULT_TERMINAL_HEIGHT = 128;
+
+  let available_height = $state(0); // bind to window.innerHeight
+  let toolbar_height = $state(TOOLBAR_HEIGHT);
+  let terminal_height = $state(DEFAULT_TERMINAL_HEIGHT + STATUS_BAR_HEIGHT);
+  let editor_height = $derived(
+    Math.max(available_height - toolbar_height - terminal_height, 0),
+  );
+
+  const adjust_height = (client_y: number) => {
+    const proposed_height = available_height - client_y;
+    terminal_height = Math.max(proposed_height, STATUS_BAR_HEIGHT);
+  };
 
   // let stdout = new Stdout();
   let purepy: PurePy | undefined = undefined;
@@ -86,8 +100,13 @@
 
 <svelte:window {onkeydown} />
 
-<div class="w-full h-full flex flex-col bg-zinc-900 overflow-clip">
-  <div class="shrink-0 grow-0 flex flex-col">
+<!-- Toolbar + Editor + Status Bar + Terminal (available_height) -->
+<div
+  bind:clientHeight={available_height}
+  class="w-full min-h-full h-full max-h-full flex flex-col"
+>
+  <!-- Toolbar (TOOLBAR_HEIGHT) -->
+  <div class="flex flex-col">
     <Toolbar
       {share}
       check={app.save_and_check}
@@ -97,18 +116,22 @@
     <Tabs {app} />
   </div>
 
-  <div class="h-auto grow shrink">
+  <!-- Editor (editor_height) -->
+  <div style="height: {editor_height}px">
     <CodeMirror bind:this={editor} {app} />
   </div>
 
-  <div class="shrink-0 grow-0 flex flex-col">
-    <TerminalDragger setHeight={(height) => (terminalHeight = height)} />
+  <!-- Status Bar + Terminal (terminal_height) -->
+  <div class="flex flex-col" style="height: {terminal_height}px">
+    <!-- Status Bar (STATUS_BAR_HEIGHT) -->
+    <TerminalDragger ondrag={adjust_height} />
     <StatusBar
       dirty={app.fs.dirty}
       check_result={app.check_result}
       eval_result={app.eval_result}
     />
-    <Terminal {terminalHeight} stdout={app.stdout} />
+    <!-- Terminal -->
+    <Terminal stdout={app.stdout} />
   </div>
 
   <Toaster />

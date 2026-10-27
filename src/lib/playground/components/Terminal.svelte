@@ -1,12 +1,8 @@
 <script lang="ts">
   import { type Stdout } from "#lib/playground/lib/stdout.svelte.js";
 
-  type Props = { terminalHeight: number | undefined; stdout: Stdout };
-  let { terminalHeight, stdout }: Props = $props();
-
-  const MIN_HEIGHT = 128;
-
-  let height = $derived(terminalHeight ?? MIN_HEIGHT);
+  type Props = { stdout: Stdout };
+  let { stdout }: Props = $props();
 
   let terminal: HTMLDivElement | undefined;
 
@@ -26,41 +22,45 @@
 
 <div
   bind:this={terminal}
-  class="min-h-32 font-mono text-sm p-2 overflow-y-scroll overflow-x-clip"
-  style="height: {height}px; min-height: {MIN_HEIGHT}px; max-height: {height}px;"
+  class="font-mono text-sm h-full overflow-y-scroll overflow-x-clip"
 >
-  {#each stdout.lines as line, index (index)}
-    {#if line.kind === "separator"}
-      <div class="my-4 border-t border-zinc-700"></div>
-    {:else if line.kind === "header"}
-      <div class="mt-6 mb-2 flex items-center gap-3">
-        <div class="h-px grow bg-zinc-700"></div>
+  <div class="pb-4">
+    {#each stdout.lines as line, index (index)}
+      {#if line.kind === "separator"}
+        <div class="my-4 border-t border-zinc-700"></div>
+      {:else if line.kind === "header"}
+        <div class="mt-6 mb-2 flex items-center gap-3">
+          <div class="h-px grow bg-zinc-700"></div>
 
+          <div
+            class="font-sans text-xs font-medium uppercase tracking-widest"
+            style="color: var(--purepy-run-success)"
+          >
+            {line.content}
+          </div>
+
+          <div class="h-px grow bg-zinc-700"></div>
+        </div>
+      {:else if line.kind === "success"}
+        <div class="font-sans px-4" style="color: var(--purepy-run-success)">
+          {line.content}
+        </div>
+      {:else if line.kind === "error"}
         <div
-          class="font-sans text-xs font-medium uppercase tracking-widest"
-          style="color: var(--purepy-run-success)"
+          class="font-sans px-4"
+          style="color: var(--purepy-diagnostic-error)"
         >
           {line.content}
         </div>
-
-        <div class="h-px grow bg-zinc-700"></div>
-      </div>
-    {:else if line.kind === "success"}
-      <div class="font-sans" style="color: var(--purepy-run-success)">
-        {line.content}
-      </div>
-    {:else if line.kind === "error"}
-      <div class="font-sans" style="color: var(--purepy-diagnostic-error)">
-        {line.content}
-      </div>
-    {:else if line.kind === "muted"}
-      <div class="mt-1 italic text-zinc-500">
-        {line.content}
-      </div>
-    {:else}
-      <div class="mt-1 whitespace-pre-wrap text-zinc-200">
-        {line.content}
-      </div>
-    {/if}
-  {/each}
+      {:else if line.kind === "muted"}
+        <div class="mt-1 italic text-zinc-500 px-4">
+          {line.content}
+        </div>
+      {:else}
+        <div class="mt-1 whitespace-pre-wrap text-zinc-200 px-4">
+          {line.content}
+        </div>
+      {/if}
+    {/each}
+  </div>
 </div>

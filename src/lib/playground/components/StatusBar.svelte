@@ -12,7 +12,7 @@
 </script>
 
 <div
-  class="min-h-6 max-h-6 px-2 flex justify-between items-center bg-gray-950 text-blue-50 text-xs font-medium"
+  class="h-6 px-4 flex justify-between items-center bg-gray-950 text-blue-50 text-xs font-medium shrink-0"
 >
   <div>
     <p>
