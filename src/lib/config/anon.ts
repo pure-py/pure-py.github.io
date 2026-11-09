@@ -3,7 +3,7 @@ import logo from "#lib/assets/image/logo.png";
 export type SiteConfig = {
   name: string;
   logo: string;
-  github: string;
+  github: string | null;
   spec: string;
   favicon: string;
 };
@@ -20,9 +20,9 @@ export const public_config = {
 } satisfies SiteConfig;
 
 export const anon_config = {
-  name: "This Project",
+  name: "OurLang",
   logo: NO_LOGO,
-  github: "https://github.com",
+  github: null,
   spec: "/spec.pdf", // Replace once an anonymous spec URL exists.
   favicon: NO_LOGO,
 } satisfies SiteConfig;
