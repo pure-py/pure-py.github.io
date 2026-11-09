@@ -1,4 +1,4 @@
-import logo from "$lib/assets/image/logo.png";
+import logo from "#lib/assets/image/logo.png";
 
 export type SiteConfig = {
   name: string;
