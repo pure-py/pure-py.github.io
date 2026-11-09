@@ -23,6 +23,6 @@ export const anon_config = {
   name: "This Project",
   logo: NO_LOGO,
   github: "https://github.com",
-  spec: "https://github.com", // Replace once an anonymous spec URL exists.
+  spec: "/spec.pdf", // Replace once an anonymous spec URL exists.
   favicon: NO_LOGO,
 } satisfies SiteConfig;
