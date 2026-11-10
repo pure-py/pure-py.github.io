@@ -1,3 +1,8 @@
+// Read the PurePy version from the uv/pip installation dir.
+// This is a convenient check that we have installed PurePy and
+// should fail at build if not. We might consider moving this to
+// a server route to ensure this only runs at build.
+
 const python_metadata = import.meta.glob(
   "#lib/python/purepy-*.dist-info/METADATA",
   {
@@ -7,8 +12,8 @@ const python_metadata = import.meta.glob(
   },
 );
 
-export const read_version = () => {
-  const entries = Object.entries(python_metadata);
+const read_version = (records: Record<string, string>) => {
+  const entries = Object.entries(records);
 
   if (entries.length === 0) {
     throw new Error("Unable to find PurePy installation metadata");
@@ -26,3 +31,5 @@ export const read_version = () => {
 
   return version_match[1]!;
 };
+
+export const PUREPY_VERSION = read_version(python_metadata);

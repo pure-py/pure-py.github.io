@@ -6,7 +6,6 @@ import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 import { PurePyDiagnostic } from "./purepy/diagnostic";
-import { read_version } from "./purepy/version";
 
 import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
 import figure_numbers from "#lib/python/purepy_conformance/figure-numbers.json?raw";
@@ -24,17 +23,9 @@ const checker_files = Object.fromEntries(
   }),
 );
 
-export const PUREPY_VERSION = read_version();
-export const PUREPY_TAG = `v${PUREPY_VERSION}`;
-
 export class PurePy {
   private pyodide: PyodideAPI;
   private stdout: Stdout | null = null;
-
-  // The version of the bundled pure-py-spec submodule, read from its
-  // pyproject.toml at build time.
-  readonly version: string = PUREPY_VERSION;
-  readonly tag: string = PUREPY_TAG;
 
   constructor(pyodide: PyodideAPI) {
     this.pyodide = pyodide;

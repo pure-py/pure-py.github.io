@@ -2,7 +2,7 @@ import { to_nonempty, type NonEmpty } from "#lib/utils/non-empty.js";
 import { once } from "#lib/utils/once.js";
 import { SvelteDate } from "svelte/reactivity";
 import { type StaticFile, FileSystem } from "./file.svelte";
-import { PUREPY_TAG, PUREPY_VERSION, type PurePy } from "./purepy";
+import { type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
 
@@ -49,9 +49,6 @@ export class State {
 
   diagnostics: EditorDiagnostic[] = $state([]);
 
-  purepy_version: string;
-  purepy_tag: string;
-
   constructor(files: NonEmpty<StaticFile>, active_index = 0) {
     this.#fs = new FileSystem(files, active_index);
 
@@ -61,10 +58,6 @@ export class State {
 
     this.check_result = $state(null);
     this.eval_result = $state(null);
-
-    // Known at build time from the bundled pure-py-spec submodule.
-    this.purepy_version = $state(PUREPY_VERSION);
-    this.purepy_tag = $state(PUREPY_TAG);
   }
 
   static default = () => {
@@ -127,9 +120,6 @@ export class State {
 
   register_purepy = once((purepy: PurePy) => {
     this.#purepy = purepy;
-
-    this.purepy_version = purepy.version;
-    this.purepy_tag = purepy.tag;
 
     this.#fs.for_each(purepy.write_file);
     this.#fs.add_hook("write", purepy.write_file);
