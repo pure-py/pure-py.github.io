@@ -20,21 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          submodules: true
-
-      - name: Verify pure-py-spec is on a tag
-        run: |
-          git -C pure-py-spec fetch origin --tags --force
-
-          TAG=$(git -C pure-py-spec tag --points-at HEAD)
-
-          if [ -z "$TAG" ]; then
-            echo "pure-py-spec is not checked out at an exact tag"
-            exit 1
-          fi
-
-          echo "pure-py-spec is pinned to $TAG"
 
       # needed to use a recent version of yarn
       - name: Enable corepack

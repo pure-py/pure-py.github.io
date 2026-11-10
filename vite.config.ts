@@ -3,7 +3,7 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { dirname, join } from "path";
-import { fileURLToPath, URL } from "url";
+import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
@@ -31,11 +31,6 @@ export function viteStaticCopyPyodide() {
 
 export default defineConfig({
   optimizeDeps: { exclude: ["pyodide"] },
-  resolve: {
-    alias: {
-      "pure-py-spec": fileURLToPath(new URL("./pure-py-spec", import.meta.url)),
-    },
-  },
   plugins: [
     tailwindcss(),
     sveltekit({

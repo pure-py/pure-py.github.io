@@ -14,8 +14,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
-    "setup": "git submodule update --init --depth 1 && yarn install && uv pip install --target src/lib/python -r pyproject.toml",
-    "submodule:update": "node scripts/update-submodule.mjs"
+    "setup": "yarn install && uv pip install --target src/lib/python -r pyproject.toml"
   },
   "devDependencies": {
     "@codemirror/lang-python": "^6.2.1",
