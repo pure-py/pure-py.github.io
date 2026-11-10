@@ -6,24 +6,21 @@ import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
+import { Diagnostic } from "./purepy/diagnostic";
 
 import pyproject_toml from "pure-py-spec/pyproject.toml?raw";
+import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
+import figure_numbers from "#lib/python/purepy_conformance/figure-numbers.json?raw";
 
-const checker_sources = import.meta.glob<string>(
-  "pure-py-spec/src/purepy/**/*.py",
-  {
-    query: "?raw",
-    import: "default",
-    eager: true,
-  },
-);
+const checker_sources = import.meta.glob<string>("#lib/python/purepy/**/*.py", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
 
 const checker_files = Object.fromEntries(
   Object.entries(checker_sources).map(([file, source]) => {
-    const relative_path = file
-      .replace(/^.*\/src\/purepy\//, "purepy/")
-      .replace(/\?raw$/, "");
-
+    const relative_path = file.replace(/^.*\/purepy?/, "purepy");
     return [relative_path, source];
   }),
 );
@@ -77,7 +74,13 @@ export class PurePy {
 
     this.pyodide.FS.mkdirTree(PUREPY_DIR);
 
-    for (const [relative_path, source] of Object.entries(checker_files)) {
+    const source_files = [
+      ...Object.entries(checker_files),
+      ["purepy_conformance/__init__.py", conformance_init],
+      ["purepy_conformance/figure-numbers.json", figure_numbers],
+    ];
+
+    for (const [relative_path, source] of source_files) {
       const path = `${PUREPY_DIR}/${relative_path}`;
       const directory = path.split("/").slice(0, -1).join("/");
 
@@ -85,11 +88,13 @@ export class PurePy {
       this.pyodide.FS.writeFile(path, source);
     }
 
-    this.run(`
-import sys
+    this.pyodide.FS.mkdirTree("user");
 
-if "${PUREPY_DIR}" not in sys.path:
-    sys.path.insert(0, "${PUREPY_DIR}")
+    this.run(`
+      import sys
+
+      if "${PUREPY_DIR}" not in sys.path:
+          sys.path.insert(0, "${PUREPY_DIR}")
     `);
   }
 
@@ -170,83 +175,32 @@ if "${PUREPY_DIR}" not in sys.path:
   check = (path: string): CheckerResult => {
     this.pyodide.globals.set("__purepy_path", path);
 
-    const result = this.run(
-      `
-import json
-import pathlib
+    const result = this.run(`
+      import pathlib
+      from purepy.check_program import ( check_program )
 
-from purepy.check_program import (
-    check_program,
-    error_path,
-    format_program_result,
-)
+      check_program(pathlib.Path("${path}"))
+    `);
 
-entry_path = pathlib.Path(__purepy_path)
-checker_result = check_program(entry_path)
-message = format_program_result(checker_result, entry_path)
-
-if checker_result is None:
-    checker_json = json.dumps({
-        "success": True,
-        "errors": [],
-        "message": message,
-    })
-else:
-    file = str(error_path(checker_result, entry_path))
-    line = getattr(checker_result, "line", None)
-    col = getattr(checker_result, "col", None)
-    msg = checker_result.msg
-
-    checker_json = json.dumps({
-        "success": False,
-        "errors": [{
-            "file": file,
-            "line": line,
-            "col": col,
-            "msg": msg,
-        }],
-        "message": message,
-    })
-
-checker_json
-      `,
-    );
-
-    if (typeof result !== "string") {
-      const message = "Checker returned an unexpected result";
-
+    if (result === undefined) {
       return {
-        success: false,
-        errors: [
-          {
-            file: path,
-            line: null,
-            col: null,
-            msg: message,
-          },
-        ],
-        message,
+        success: true,
+        errors: [],
+        message: "ok",
       };
-    }
-
-    try {
-      return CheckerResult.parse(JSON.parse(result));
-    } catch (error) {
-      console.error("Invalid checker result:", result, error);
-
-      const message = "Checker returned invalid JSON";
-
+    } else {
+      const diagnostic = Diagnostic.parse(result);
       return {
         success: false,
         errors: [
           {
             file: path,
-            line: null,
-            col: null,
-            msg: message,
+            line: diagnostic.position?.line,
+            col: diagnostic.position?.col,
+            msg: diagnostic.message,
           },
         ],
-        message,
+        message: "not ok",
       };
     }
   };
