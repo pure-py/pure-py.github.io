@@ -8,6 +8,8 @@ This repository includes the [`pure-py-spec`](https://github.com/pure-py/pure-py
 
 After cloning, initialise the submodule with shallow history and install dependencies:
 
+<!-- TODO: something about needing `uv` -->
+
 ```bash
 yarn setup
 ```
