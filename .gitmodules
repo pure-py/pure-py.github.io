@@ -2,3 +2,7 @@
 	path = pure-py-spec
 	url = https://github.com/pure-py/pure-py-spec.git
 	shallow = true
+[submodule "isabelle-purepy"]
+	path = isabelle-purepy
+	url = https://github.com/pure-py/isabelle-purepy.git
+	shallow = true
