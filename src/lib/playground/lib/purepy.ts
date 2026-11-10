@@ -1,4 +1,3 @@
-import * as z from "zod/mini";
 // We deliberately only load the type here, and later lazy-load the full
 // import during initialisation, to improve the loading experience on
 // slower connections
@@ -6,7 +5,7 @@ import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
-import { Diagnostic } from "./purepy/diagnostic";
+import { PurePyDiagnostic } from "./purepy/diagnostic";
 
 import pyproject_toml from "pure-py-spec/pyproject.toml?raw";
 import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
@@ -35,29 +34,6 @@ const purepy_version = version_match[1];
 
 export const PUREPY_VERSION = purepy_version;
 export const PUREPY_TAG = `v${purepy_version}`;
-
-const CheckerError = z.object({
-  file: z.optional(z.nullable(z.string())),
-  line: z.optional(z.nullable(z.number())),
-  col: z.optional(z.nullable(z.number())),
-  msg: z.string(),
-});
-
-const CheckerResult = z.union([
-  z.object({
-    success: z.literal(true),
-    errors: z.array(z.never()),
-    message: z.string(),
-  }),
-  z.object({
-    success: z.literal(false),
-    errors: z.array(CheckerError),
-    message: z.string(),
-  }),
-]);
-
-export type CheckerError = z.infer<typeof CheckerError>;
-export type CheckerResult = z.infer<typeof CheckerResult>;
 
 export class PurePy {
   private pyodide: PyodideAPI;
@@ -172,9 +148,7 @@ export class PurePy {
     }
   };
 
-  check = (path: string): CheckerResult => {
-    this.pyodide.globals.set("__purepy_path", path);
-
+  check = (path: string) => {
     const result = this.run(`
       import pathlib
       from purepy.check_program import ( check_program )
@@ -185,27 +159,22 @@ export class PurePy {
     if (result === undefined) {
       return {
         success: true,
-        errors: [],
-        message: "ok",
-      };
+      } as const;
     } else {
-      const diagnostic = Diagnostic.parse(result);
+      const diagnostic = PurePyDiagnostic.parse(result);
       return {
         success: false,
-        errors: [
-          {
-            file: path,
-            line: diagnostic.position?.line,
-            col: diagnostic.position?.col,
-            msg: diagnostic.message,
-          },
-        ],
-        message: "not ok",
-      };
+        error: {
+          file: path,
+          line: diagnostic.position?.line ?? null,
+          col: diagnostic.position?.col ?? null,
+          message: diagnostic.message,
+        },
+      } as const;
     }
   };
 
-  parse_and_check = (file: ReadonlyFile): CheckerResult => {
+  parse_and_check = (file: ReadonlyFile) => {
     this.write_file(file);
 
     return this.check(file.path);

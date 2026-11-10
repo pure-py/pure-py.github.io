@@ -18,7 +18,7 @@ const Position = z
     };
   });
 
-export const Diagnostic = z.object({
+export const PurePyDiagnostic = z.object({
   outcome: z.string(),
   module: z.optional(Name),
   position: z.optional(Position),

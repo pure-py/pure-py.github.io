@@ -149,25 +149,16 @@ export class State {
     fd: number,
   ): {
     diagnostics: EditorDiagnostic[];
-    message: string;
     success: boolean;
   } => {
     const file = this.#fs.file(fd);
 
     const result = purepy.parse_and_check(file);
 
-    const diagnostics = result.success
-      ? []
-      : result.errors.map((error) => ({
-          file: error.file ?? null,
-          line: error.line ?? null,
-          col: error.col ?? null,
-          message: error.msg,
-        }));
+    const diagnostics = result.success ? [] : [result.error];
 
     return {
       diagnostics,
-      message: result.message,
       success: result.success,
     };
   };
@@ -220,7 +211,6 @@ export class State {
 
     return {
       success: active_result.success,
-      message: active_result.message,
     };
   };
 
