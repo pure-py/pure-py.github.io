@@ -7,10 +7,10 @@ import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 
-import pyproject_toml from "pure-py-spec/pyproject.toml?raw";
+import pyproject_toml from "#lib/modules/pure-py-spec/pyproject.toml?raw";
 
 const checker_sources = import.meta.glob<string>(
-  "pure-py-spec/src/purepy/**/*.py",
+  "#lib/modules/pure-py-spec/src/purepy/**/*.py",
   {
     query: "?raw",
     import: "default",

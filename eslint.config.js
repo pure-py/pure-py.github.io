@@ -13,7 +13,7 @@ const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
 
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
-  globalIgnores(["pure-py-spec/**"]),
+  globalIgnores(["src/lib/modules/**"]),
   js.configs.recommended,
   ts.configs.recommended,
   svelte.configs.recommended,

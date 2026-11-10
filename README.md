@@ -26,29 +26,26 @@ yarn dev      # local dev server
 yarn build    # static output in build/
 ```
 
-## Updating the submodule
+## Updating the submodules
 
-To update `pure-py-spec` to the latest tagged release:
+To update `pure-py-spec` and `isabelle-purepy` to the latest tagged release:
 
 ```bash
 yarn submodule:update
 ```
 
-Then commit the updated submodule pointer:
+To commit the update to `pure-py-spec`:
 
 ```bash
-git add pure-py-spec
+git add src/lib/modules/pure-py-spec
 git commit -m "Pin pure-py-spec submodule to $(git -C pure-py-spec describe --tags --abbrev=0)"
 ```
 
-To update it manually to a specific release:
+To update `pure-py-spec` manually to a specific release:
 
 ```bash
-cd pure-py-spec
-git checkout v1.2.3
-cd ..
-
-git add pure-py-spec
+git -C src/lib/modules/pure-py-spec checkout v1.2.3
+git add src/lib/modules/pure-py-spec
 git commit -m "Pin pure-py-spec to v1.2.3"
 ```
 

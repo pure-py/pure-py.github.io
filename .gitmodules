@@ -1,8 +1,8 @@
 [submodule "pure-py-spec"]
-	path = pure-py-spec
+	path = src/lib/modules/pure-py-spec
 	url = https://github.com/pure-py/pure-py-spec.git
 	shallow = true
 [submodule "isabelle-purepy"]
-	path = isabelle-purepy
+	path = src/lib/modules/isabelle-purepy
 	url = https://github.com/pure-py/isabelle-purepy.git
 	shallow = true

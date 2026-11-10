@@ -31,11 +31,6 @@ export function viteStaticCopyPyodide() {
 
 export default defineConfig({
   optimizeDeps: { exclude: ["pyodide"] },
-  resolve: {
-    alias: {
-      "pure-py-spec": fileURLToPath(new URL("./pure-py-spec", import.meta.url)),
-    },
-  },
   plugins: [
     tailwindcss(),
     sveltekit({

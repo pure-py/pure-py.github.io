@@ -10,8 +10,8 @@ build/
 .svelte-kit/
 node_modules/
 
-# Git submodule
-pure-py-spec/
+# Git submodules
+src/lib/modules/
 
 # Miscellaneous
 /static/

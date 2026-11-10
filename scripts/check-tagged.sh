@@ -2,11 +2,14 @@
 
 set -e
 
-git -C pure-py-spec fetch origin --tags --force
-git -C isabelle-purepy fetch origin --tags --force
+spec="src/lib/modules/pure-py-spec"
+checker="src/lib/modules/isabelle-purepy"
 
-SPEC_TAG=$(git -C pure-py-spec tag --points-at HEAD)
-CHECKER_TAG=$(git -C isabelle-purepy tag --points-at HEAD)
+git -C "$spec" fetch origin --tags --force
+git -C  "$checker" fetch origin --tags --force
+
+SPEC_TAG=$(git -C "$spec" tag --points-at HEAD)
+CHECKER_TAG=$(git -C "$checker" tag --points-at HEAD)
 
 if [ -z "$SPEC_TAG" ]; then
   echo "pure-py-spec is not checked out at an exact tag"
