@@ -6,8 +6,8 @@ import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 import { PurePyDiagnostic } from "./purepy/diagnostic";
+import { read_version } from "./purepy/version";
 
-import pyproject_toml from "pure-py-spec/pyproject.toml?raw";
 import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
 import figure_numbers from "#lib/python/purepy_conformance/figure-numbers.json?raw";
 
@@ -24,16 +24,8 @@ const checker_files = Object.fromEntries(
   }),
 );
 
-const version_match = pyproject_toml.match(/^version\s*=\s*"([^"]+)"/m);
-
-if (version_match === null) {
-  throw new Error("Could not read version from pyproject.toml");
-}
-
-const purepy_version = version_match[1];
-
-export const PUREPY_VERSION = purepy_version;
-export const PUREPY_TAG = `v${purepy_version}`;
+export const PUREPY_VERSION = read_version();
+export const PUREPY_TAG = `v${PUREPY_VERSION}`;
 
 export class PurePy {
   private pyodide: PyodideAPI;
