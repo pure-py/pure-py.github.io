@@ -10,4 +10,5 @@ node_modules/
 
 /src/lib/python
 
-/static/spec.pdf
+/static/PurePy-spec.pdf
+/static/spec-anon.pdf
