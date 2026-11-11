@@ -11,6 +11,6 @@ if [ "${ANONYMOUS:-}" = true ]; then
 fi
 
 url="https://pure-py.github.io/pure-py-spec/v$version/$filename"
-dst="static/spec.pdf"
+dst="static/$filename"
 
 curl -L "$url" -o "$dst"
