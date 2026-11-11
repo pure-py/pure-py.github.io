@@ -17,21 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          submodules: true
-
-      - name: Verify pure-py-spec is on a tag
-        run: |
-          git -C pure-py-spec fetch origin --tags --force
-
-          TAG=$(git -C pure-py-spec tag --points-at HEAD)
-
-          if [ -z "$TAG" ]; then
-            echo "pure-py-spec is not checked out at an exact tag"
-            exit 1
-          fi
-
-          echo "pure-py-spec is pinned to $TAG"
 
       # needed to use a recent version of yarn
       - name: Enable corepack
@@ -43,16 +28,24 @@ jobs:
           cache: yarn
           cache-dependency-path: yarn.lock
 
-      - name: Install
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+
+      - name: Install Node dependencies
         run: yarn install --immutable
 
-      - name: Download spec # FIXME(jacobpake)
-        run: curl -L https://pure-py.github.io/pure-py-spec/v0.27.4/spec-anon.pdf -o static/spec.pdf
+      - name: Install Python dependencies
+        run: uv pip install --target src/lib/python -r pyproject.toml
+
+      - name: Download Spec
+        run: ./scripts/download-spec.sh
 
       - name: Build
         run: yarn build
 
-      - name: Upload
+      - name: Deploy to CF Pages
         uses: cloudflare/wrangler-action@v4
         with:
           command: deploy --name pldi-anon --assets build
