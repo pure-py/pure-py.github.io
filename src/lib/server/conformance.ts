@@ -35,55 +35,52 @@ const parse_test_root = (path: string) => {
 export const build_registry = async (records: Record<string, string>) => {
   const registry: Record<string, NonEmpty<StaticFile>> = {};
   const paths = Object.keys(records);
+  const unvisited = new Set(paths);
 
   for (const path of paths) {
+    if (!path.endsWith("main.py")) {
+      continue;
+    }
+
+    const root = parse_test_root(path);
+
+    const prefix = `./${root.key}`;
+
+    const related = paths.filter((other) => {
+      return (
+        other.startsWith(`./${root.key}/`) &&
+        other.endsWith(".py") &&
+        other !== path
+      );
+    });
+
+    const files = await Promise.all(
+      nonempty_map([path, ...related], async (path) => {
+        const content = await read(records[path]).text();
+        unvisited.delete(path);
+        return {
+          path: path.slice(prefix.length + 1),
+          data: content,
+        } as const;
+      }),
+    );
+
+    registry[root.key] = files;
+  }
+
+  for (const path of unvisited) {
     if (!path.endsWith(".py")) {
       continue;
     }
 
-    const depth = path.split("/").length;
+    const root = parse_test_root(path);
+    const content = await read(records[path]).text();
+    const file = {
+      path: root.name + ".py",
+      data: content,
+    } as const;
 
-    const module_level_root = depth === 4 && !path.endsWith("main.py");
-    const program_level_root = depth === 5 && path.endsWith("main.py");
-
-    if (!module_level_root && !program_level_root) {
-      continue;
-    }
-
-    if (module_level_root) {
-      const root = parse_test_root(path);
-      const content = await read(records[path]).text();
-      const file = {
-        path: root.name + ".py",
-        data: content,
-      } as const;
-
-      registry[root.key] = [file] as const;
-    } else if (program_level_root) {
-      const root = parse_test_root(path);
-
-      const prefix = `./${root.key}`;
-
-      const related = paths.filter((other) => {
-        return (
-          other.startsWith(`./${root.key}`) &&
-          other.endsWith(".py") &&
-          other !== path
-        );
-      });
-
-      const files = await Promise.all(
-        nonempty_map([path, ...related], async (path) => {
-          const content = await read(records[path]).text();
-          return {
-            path: path.slice(prefix.length + 1),
-            data: content,
-          } as const;
-        }),
-      );
-
-      registry[root.key] = files;
-    }
+    registry[root.key] = [file] as const;
   }
 
   return {
