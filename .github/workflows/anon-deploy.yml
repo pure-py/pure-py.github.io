@@ -1,0 +1,39 @@
+name: Anonymous Deployment
+description: Update the anonymous deployment
+
+on:
+  push:
+    branches: [main, anon-workflow] # FIXME
+
+concurrency:
+  group: anon-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  build:
+    name: Deploy anonymised website
+    env:
+      ANONYMOUS: "true"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup
+
+      - name: Download Spec
+        run: ./scripts/download-spec.sh
+
+      - name: Build
+        run: yarn build
+
+      - name: Deploy to CF Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          command: deploy --name pldi-anon --assets build
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

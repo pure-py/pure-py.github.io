@@ -17,7 +17,9 @@
   <div class="cta">
     <a class="button primary" href={data.config.spec}>Read the spec</a>
 
-    <a class="button" href={data.config.github}>GitHub</a>
+    {#if data.config.github}
+      <a class="button" href={data.config.github}>GitHub</a>
+    {/if}
   </div>
 </section>
 

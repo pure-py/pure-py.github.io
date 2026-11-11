@@ -21,18 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # needed to use a recent version of yarn
-      - name: Enable corepack
-        run: corepack enable
+      - uses: ./.github/actions/setup
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24 # current lts
-          cache: yarn
-          cache-dependency-path: yarn.lock
-
-      - name: Install
-        run: yarn install --immutable
+      - name: Download Spec
+        run: ./scripts/download-spec.sh
 
       - name: Build
         run: yarn build
