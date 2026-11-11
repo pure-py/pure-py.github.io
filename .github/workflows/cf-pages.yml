@@ -24,6 +24,9 @@ jobs:
       - name: Download Spec
         run: ./scripts/download-spec.sh
 
+      - name: Download Spec
+        run: ./scripts/download-spec.sh
+
       - name: Build
         run: yarn build
 
