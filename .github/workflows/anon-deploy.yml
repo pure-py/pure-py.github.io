@@ -1,43 +1,28 @@
 name: Anonymous Deployment
+description: Update the anonymous deployment
 
 on:
   push:
     branches: [main, anon-workflow] # FIXME
-  workflow_dispatch:
 
 concurrency:
   group: anon-deploy
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   build:
-    name: Build
+    name: Deploy anonymised website
     env:
       ANONYMOUS: "true"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      # needed to use a recent version of yarn
-      - name: Enable corepack
-        run: corepack enable
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24 # current lts
-          cache: yarn
-          cache-dependency-path: yarn.lock
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v10.2.0
-        with:
-          enable-cache: true
-
-      - name: Install Node dependencies
-        run: yarn install --immutable
-
-      - name: Install Python dependencies
-        run: uv pip install --target src/lib/python -r pyproject.toml
+      - uses: ./.github/actions/setup
 
       - name: Download Spec
         run: ./scripts/download-spec.sh
@@ -51,3 +36,4 @@ jobs:
           command: deploy --name pldi-anon --assets build
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
