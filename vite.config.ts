@@ -36,6 +36,9 @@ export default defineConfig({
     sveltekit({
       preprocess: vitePreprocess(),
       adapter: adapter(),
+      prerender: {
+        entries: ["*", "/conformance-suite"],
+      },
     }),
     viteStaticCopyPyodide(),
   ],

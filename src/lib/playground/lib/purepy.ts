@@ -61,7 +61,7 @@ export class PurePy {
     const { loadPyodide } = await import("pyodide");
 
     const pyodide = await loadPyodide({
-      indexURL: `${import.meta.env.BASE_URL}pyodide/`,
+      indexURL: `/pyodide`,
     });
 
     return new PurePy(pyodide);
