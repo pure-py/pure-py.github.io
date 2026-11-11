@@ -254,9 +254,7 @@ export class State {
 
       const output_start = this.#stdout.lines.length;
 
-      const { success, output } = purepy.evaluate(
-        this.#fs.file(this.#fs.active_fd),
-      );
+      const { success } = purepy.evaluate(this.#fs.file(this.#fs.active_fd));
 
       const time = Date.now() - run_start;
 
@@ -271,18 +269,9 @@ export class State {
         .slice(output_start)
         .some((line) => line.kind === "output");
 
-      const returned_output =
-        output !== undefined && output !== null && output !== "";
-
-      if (!streamed_output && !returned_output) {
+      if (!streamed_output) {
         this.#stdout.write_muted("(no output)");
         return;
-      }
-
-      if (!streamed_output && returned_output) {
-        this.#stdout.write(
-          typeof output === "object" ? JSON.stringify(output) : `${output}`,
-        );
       }
     });
 
