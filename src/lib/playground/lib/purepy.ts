@@ -173,7 +173,7 @@ export class PurePy {
       // and the collection of print outputs which we have captured
       const result = this.run(`
         import pathlib
-        from purepy.run_program import ( check, evaluate, Diagnostic )
+        from purepy.run_program import ( check, evaluate, Diagnostic, format_diagnostic, exit_code )
 
         def run_program(entry_path: pathlib.Path) -> int:
             match check(entry_path):
