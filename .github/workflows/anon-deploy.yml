@@ -3,7 +3,7 @@ description: Update the anonymous deployment
 
 on:
   push:
-    branches: [main, anon-workflow] # FIXME
+    branches: [main]
 
 concurrency:
   group: anon-deploy
