@@ -26,10 +26,10 @@ const parse_test_root = (path: string) => {
   if (path.startsWith("./")) {
     path = path.slice(2);
   }
-  const [level, python_outcome, purepy_outcome, ...rest] = parse_path(path);
+  const [python_outcome, purepy_outcome, ...rest] = parse_path(path);
   const name = name_from_parts(rest);
-  const key = `${level}/${python_outcome}/${purepy_outcome}/${name}`;
-  return { level, python_outcome, purepy_outcome, name, key };
+  const key = `${python_outcome}/${purepy_outcome}/${name}`;
+  return { python_outcome, purepy_outcome, name, key };
 };
 
 export const build_registry = async (records: Record<string, string>) => {
@@ -37,16 +37,20 @@ export const build_registry = async (records: Record<string, string>) => {
   const paths = Object.keys(records);
 
   for (const path of paths) {
-    // the structure of this one is a bit different and
-    // needs special handling
-    if (path.includes("syntactic-only")) {
+    if (!path.endsWith(".py")) {
       continue;
     }
 
-    if (path.startsWith("./module-level")) {
-      if (!path.endsWith(".py")) {
-        continue;
-      }
+    const depth = path.split("/").length;
+
+    const module_level_root = depth === 4 && !path.endsWith("main.py");
+    const program_level_root = depth === 5 && path.endsWith("main.py");
+
+    if (!module_level_root && !program_level_root) {
+      continue;
+    }
+
+    if (module_level_root) {
       const root = parse_test_root(path);
       const content = await read(records[path]).text();
       const file = {
@@ -54,14 +58,8 @@ export const build_registry = async (records: Record<string, string>) => {
         data: content,
       } as const;
 
-      console.log(root);
       registry[root.key] = [file] as const;
-    }
-
-    if (path.startsWith("./program-level")) {
-      if (!path.endsWith("main.py")) {
-        continue;
-      }
+    } else if (program_level_root) {
       const root = parse_test_root(path);
 
       const prefix = `./${root.key}`;
