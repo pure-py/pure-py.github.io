@@ -8,7 +8,8 @@
   import Toolbar from "#lib/playground/components/Toolbar.svelte";
   import Toaster, { toast } from "#lib/playground/components/Toaster.svelte";
 
-  import { PUREPY_VERSION, PurePy } from "#lib/playground/lib/purepy.js";
+  import { PurePy } from "#lib/playground/lib/purepy.js";
+  import { PUREPY_VERSION } from "#lib/playground/lib/purepy/version.js";
   import { url_with_params_from_state } from "#lib/playground/lib/share.js";
 
   import { onMount } from "svelte";

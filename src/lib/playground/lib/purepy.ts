@@ -1,4 +1,3 @@
-import * as z from "zod/mini";
 // We deliberately only load the type here, and later lazy-load the full
 // import during initialisation, to improve the loading experience on
 // slower connections
@@ -6,70 +5,27 @@ import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
+import { PurePyDiagnostic } from "./purepy/diagnostic";
 
-import pyproject_toml from "pure-py-spec/pyproject.toml?raw";
+import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
+import figure_numbers from "#lib/python/purepy_conformance/figure-numbers.json?raw";
 
-const checker_sources = import.meta.glob<string>(
-  "pure-py-spec/src/purepy/**/*.py",
-  {
-    query: "?raw",
-    import: "default",
-    eager: true,
-  },
-);
+const checker_sources = import.meta.glob<string>("#lib/python/purepy/**/*.py", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
 
 const checker_files = Object.fromEntries(
   Object.entries(checker_sources).map(([file, source]) => {
-    const relative_path = file
-      .replace(/^.*\/src\/purepy\//, "purepy/")
-      .replace(/\?raw$/, "");
-
+    const relative_path = file.replace(/^.*\/purepy?/, "purepy");
     return [relative_path, source];
   }),
 );
 
-const version_match = pyproject_toml.match(/^version\s*=\s*"([^"]+)"/m);
-
-if (version_match === null) {
-  throw new Error("Could not read version from pyproject.toml");
-}
-
-const purepy_version = version_match[1];
-
-export const PUREPY_VERSION = purepy_version;
-export const PUREPY_TAG = `v${purepy_version}`;
-
-const CheckerError = z.object({
-  file: z.optional(z.nullable(z.string())),
-  line: z.optional(z.nullable(z.number())),
-  col: z.optional(z.nullable(z.number())),
-  msg: z.string(),
-});
-
-const CheckerResult = z.union([
-  z.object({
-    success: z.literal(true),
-    errors: z.array(z.never()),
-    message: z.string(),
-  }),
-  z.object({
-    success: z.literal(false),
-    errors: z.array(CheckerError),
-    message: z.string(),
-  }),
-]);
-
-export type CheckerError = z.infer<typeof CheckerError>;
-export type CheckerResult = z.infer<typeof CheckerResult>;
-
 export class PurePy {
   private pyodide: PyodideAPI;
   private stdout: Stdout | null = null;
-
-  // The version of the bundled pure-py-spec submodule, read from its
-  // pyproject.toml at build time.
-  readonly version: string = PUREPY_VERSION;
-  readonly tag: string = PUREPY_TAG;
 
   constructor(pyodide: PyodideAPI) {
     this.pyodide = pyodide;
@@ -77,7 +33,13 @@ export class PurePy {
 
     this.pyodide.FS.mkdirTree(PUREPY_DIR);
 
-    for (const [relative_path, source] of Object.entries(checker_files)) {
+    const source_files = [
+      ...Object.entries(checker_files),
+      ["purepy_conformance/__init__.py", conformance_init],
+      ["purepy_conformance/figure-numbers.json", figure_numbers],
+    ];
+
+    for (const [relative_path, source] of source_files) {
       const path = `${PUREPY_DIR}/${relative_path}`;
       const directory = path.split("/").slice(0, -1).join("/");
 
@@ -85,11 +47,13 @@ export class PurePy {
       this.pyodide.FS.writeFile(path, source);
     }
 
-    this.run(`
-import sys
+    this.pyodide.FS.mkdirTree("user");
 
-if "${PUREPY_DIR}" not in sys.path:
-    sys.path.insert(0, "${PUREPY_DIR}")
+    this.run(`
+      import sys
+
+      if "${PUREPY_DIR}" not in sys.path:
+          sys.path.insert(0, "${PUREPY_DIR}")
     `);
   }
 
@@ -167,91 +131,33 @@ if "${PUREPY_DIR}" not in sys.path:
     }
   };
 
-  check = (path: string): CheckerResult => {
-    this.pyodide.globals.set("__purepy_path", path);
+  check = (path: string) => {
+    const result = this.run(`
+      import pathlib
+      from purepy.check_program import ( check_program )
 
-    const result = this.run(
-      `
-import json
-import pathlib
+      check_program(pathlib.Path("${path}"))
+    `);
 
-from purepy.check_program import (
-    check_program,
-    error_path,
-    format_program_result,
-)
-
-entry_path = pathlib.Path(__purepy_path)
-checker_result = check_program(entry_path)
-message = format_program_result(checker_result, entry_path)
-
-if checker_result is None:
-    checker_json = json.dumps({
-        "success": True,
-        "errors": [],
-        "message": message,
-    })
-else:
-    file = str(error_path(checker_result, entry_path))
-    line = getattr(checker_result, "line", None)
-    col = getattr(checker_result, "col", None)
-    msg = checker_result.msg
-
-    checker_json = json.dumps({
-        "success": False,
-        "errors": [{
-            "file": file,
-            "line": line,
-            "col": col,
-            "msg": msg,
-        }],
-        "message": message,
-    })
-
-checker_json
-      `,
-    );
-
-    if (typeof result !== "string") {
-      const message = "Checker returned an unexpected result";
-
+    if (result === undefined) {
+      return {
+        success: true,
+      } as const;
+    } else {
+      const diagnostic = PurePyDiagnostic.parse(result);
       return {
         success: false,
-        errors: [
-          {
-            file: path,
-            line: null,
-            col: null,
-            msg: message,
-          },
-        ],
-        message,
-      };
-    }
-
-    try {
-      return CheckerResult.parse(JSON.parse(result));
-    } catch (error) {
-      console.error("Invalid checker result:", result, error);
-
-      const message = "Checker returned invalid JSON";
-
-      return {
-        success: false,
-        errors: [
-          {
-            file: path,
-            line: null,
-            col: null,
-            msg: message,
-          },
-        ],
-        message,
-      };
+        error: {
+          file: path,
+          line: diagnostic.position?.line ?? null,
+          col: diagnostic.position?.col ?? null,
+          message: diagnostic.message,
+        },
+      } as const;
     }
   };
 
-  parse_and_check = (file: ReadonlyFile): CheckerResult => {
+  parse_and_check = (file: ReadonlyFile) => {
     this.write_file(file);
 
     return this.check(file.path);
