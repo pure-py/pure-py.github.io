@@ -9,6 +9,8 @@
   } from "#lib/playground/lib/share/codec.js";
   import { onMount } from "svelte";
 
+  let { data } = $props();
+
   // we have to do this ugly pattern because we need to avoid
   // trying to access the url.hash on the "server", and our
   // decompression is async
@@ -60,6 +62,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>Playground | {data.config.name}</title>
+</svelte:head>
 
 <div class="w-full h-dvh max-h-screen bg-zinc-900">
   {#await app_promise}

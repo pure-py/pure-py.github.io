@@ -4,6 +4,10 @@
   let grouped = $derived(group(data.tests));
 </script>
 
+<svelte:head>
+  <title>Conformance Suite | {data.config.name}</title>
+</svelte:head>
+
 <p>test count: {data.tests.length}</p>
 
 <ul>
