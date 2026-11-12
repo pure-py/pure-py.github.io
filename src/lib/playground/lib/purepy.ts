@@ -5,7 +5,7 @@ import { type PyodideAPI } from "pyodide";
 import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
-import { PurePyDiagnostic } from "./purepy/diagnostic";
+import { PurePyCheckResult, PurePyEvalResult } from "./purepy/result";
 
 import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
 import figure_numbers from "#lib/python/purepy_conformance/figure-numbers.json?raw";
@@ -134,19 +134,31 @@ export class PurePy {
   check = (path: string) => {
     const result = this.run(`
       import pathlib
+      import time
+
       from purepy.check_program import ( check_program )
 
-      check_program(pathlib.Path("${path}"))
+      path = pathlib.Path("${path}")
+
+      start = time.perf_counter_ns()
+      diagnostic = check_program(path)
+      end = time.perf_counter_ns()
+      elapsed = (end - start) // 1_000_000 # milliseconds
+
+      { "diagnostic": diagnostic, "elapsed": elapsed }
     `);
 
-    if (result === undefined) {
+    const { diagnostic, elapsed } = PurePyCheckResult.parse(result);
+
+    if (diagnostic === undefined) {
       return {
         success: true,
+        time: elapsed,
       } as const;
     } else {
-      const diagnostic = PurePyDiagnostic.parse(result);
       return {
         success: false,
+        time: elapsed,
         error: {
           file: path,
           line: diagnostic.position?.line ?? null,
@@ -179,17 +191,25 @@ export class PurePy {
             match check(entry_path):
                 case Diagnostic() as d:
                     print(format_diagnostic(d, entry_path))
-                    return int(exit_code(d))
+                    return { "status": int(exit_code(d)), "elapsed": 0 }
                 case (M, sigma):
                     pass
-            return evaluate(sigma, M, [str(entry_path)], 100_000)
+
+            start = time.perf_counter_ns()
+            status = evaluate(sigma, M, [str(entry_path)], 100_000)
+            end = time.perf_counter_ns()
+            elapsed = (end - start) // 1_000_000 # milliseconds
+            return { "status": status, "elapsed": elapsed }
 
 
         run_program(pathlib.Path("${file.path}"))
       `);
 
+      const { status, elapsed } = PurePyEvalResult.parse(result);
+
       return {
-        success: result === 0,
+        success: status === 0,
+        elapsed,
       } as const;
     } catch (error) {
       console.error(error);
@@ -200,6 +220,7 @@ export class PurePy {
 
       return {
         success: false,
+        elapsed: 0,
       } as const;
     }
   };
