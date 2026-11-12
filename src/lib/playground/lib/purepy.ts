@@ -165,11 +165,31 @@ export class PurePy {
 
   evaluate = (file: ReadonlyFile) => {
     try {
-      const result: unknown = this.pyodide.runPython(file.data);
+      // at this point we have already confirmed there is no parse
+      // error but we don't have the parsed program, so we run it
+      // again (a future version could reuse the check result here).
+      // we can't use the existing `run_program` because it uses threads.
+      // a program has no evaluation result except from the exit code
+      // and the collection of print outputs which we have captured
+      const result = this.run(`
+        import pathlib
+        from purepy.run_program import ( check, evaluate, Diagnostic, format_diagnostic, exit_code )
+
+        def run_program(entry_path: pathlib.Path) -> int:
+            match check(entry_path):
+                case Diagnostic() as d:
+                    print(format_diagnostic(d, entry_path))
+                    return int(exit_code(d))
+                case (M, sigma):
+                    pass
+            return evaluate(sigma, M, [str(entry_path)], 100_000)
+
+
+        run_program(pathlib.Path("${file.path}"))
+      `);
 
       return {
-        success: true,
-        output: result,
+        success: result === 0,
       } as const;
     } catch (error) {
       console.error(error);
@@ -180,7 +200,6 @@ export class PurePy {
 
       return {
         success: false,
-        output: undefined,
       } as const;
     }
   };
