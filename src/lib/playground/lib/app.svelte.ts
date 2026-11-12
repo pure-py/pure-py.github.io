@@ -260,16 +260,7 @@ export class State {
 
       this.eval_result = { success, time };
 
-      if (!success) {
-        this.#stdout.remove_last();
-        return;
-      }
-
-      const streamed_output = this.#stdout.lines
-        .slice(output_start)
-        .some((line) => line.kind === "output");
-
-      if (!streamed_output) {
+      if (output_start === this.#stdout.lines.length) {
         this.#stdout.write_muted("(no output)");
         return;
       }
