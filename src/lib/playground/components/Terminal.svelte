@@ -33,8 +33,7 @@
           <div class="h-px grow bg-zinc-700"></div>
 
           <div
-            class="font-sans text-xs font-medium uppercase tracking-widest"
-            style="color: var(--purepy-run-success)"
+            class="font-sans text-xs text-zinc-400 font-medium uppercase tracking-widest"
           >
             {line.content}
           </div>
@@ -42,14 +41,11 @@
           <div class="h-px grow bg-zinc-700"></div>
         </div>
       {:else if line.kind === "success"}
-        <div class="font-sans px-4" style="color: var(--purepy-run-success)">
+        <div class="px-4" style="color: var(--purepy-run-success)">
           {line.content}
         </div>
       {:else if line.kind === "error"}
-        <div
-          class="font-sans px-4"
-          style="color: var(--purepy-diagnostic-error)"
-        >
+        <div class="px-4" style="color: var(--purepy-diagnostic-error)">
           {line.content}
         </div>
       {:else if line.kind === "muted"}
