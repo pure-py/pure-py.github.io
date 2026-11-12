@@ -27,6 +27,7 @@
     {#if data.config.github}
       <a href={data.config.github} target="_blank">GitHub</a>
     {/if}
+    <a href="/playground">Playground</a>
   </nav>
 </header>
 
