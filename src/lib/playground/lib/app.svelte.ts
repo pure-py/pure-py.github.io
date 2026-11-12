@@ -1,10 +1,10 @@
 import { to_nonempty, type NonEmpty } from "#lib/utils/non-empty.js";
 import { once } from "#lib/utils/once.js";
-import { SvelteDate } from "svelte/reactivity";
 import { type StaticFile, FileSystem } from "./file.svelte";
 import { type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
+import { formatted_time } from "#lib/utils/time.ts";
 
 const example_sources = import.meta.glob("#lib/assets/examples/**/*.py", {
   query: "?raw",
@@ -140,6 +140,7 @@ export class State {
   ): {
     diagnostics: EditorDiagnostic[];
     success: boolean;
+    time: number;
   } => {
     const file = this.#fs.file(fd);
 
@@ -150,12 +151,11 @@ export class State {
     return {
       diagnostics,
       success: result.success,
+      time: result.time,
     };
   };
 
   #check = (purepy: PurePy) => {
-    const start = Date.now();
-
     // Check every open file exactly once.
     const results = this.#fs.files.map((_, fd) => this.#check_file(purepy, fd));
 
@@ -163,8 +163,6 @@ export class State {
 
     const active_fd = this.#fs.active_fd;
     const active_result = results[active_fd];
-
-    const time = Date.now() - start;
 
     // Store one entry per unique diagnostic across all files.
     this.diagnostics = all_diagnostics.filter(
@@ -196,7 +194,7 @@ export class State {
 
     this.check_result = {
       success: active_result.success,
-      time,
+      time: active_result.time,
     };
 
     return {
@@ -240,25 +238,21 @@ export class State {
 
   save_and_run = () =>
     this.#statefully((purepy) => {
-      const start = new SvelteDate();
-
       const result = this.#check(purepy);
 
       if (!result.success) {
         return;
       }
 
-      this.#stdout.write_header(`Run · ${start.toLocaleTimeString()}`);
-
-      const run_start = Date.now();
+      this.#stdout.write_header(`Run · ${formatted_time()}`);
 
       const output_start = this.#stdout.lines.length;
 
-      const { success } = purepy.evaluate(this.#fs.file(this.#fs.active_fd));
+      const { success, elapsed } = purepy.evaluate(
+        this.#fs.file(this.#fs.active_fd),
+      );
 
-      const time = Date.now() - run_start;
-
-      this.eval_result = { success, time };
+      this.eval_result = { success, time: elapsed };
 
       if (output_start === this.#stdout.lines.length) {
         this.#stdout.write_muted("(no output)");

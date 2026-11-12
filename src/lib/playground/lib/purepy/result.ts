@@ -43,3 +43,13 @@ export const PurePyDiagnostic = z.object({
   judgement: z.optional(z.string()),
   rule: z.optional(z.string()),
 });
+
+export const PurePyCheckResult = z.object({
+  diagnostic: z.optional(PurePyDiagnostic),
+  elapsed: z.number(),
+});
+
+export const PurePyEvalResult = z.object({
+  status: z.number(),
+  elapsed: z.number(),
+});
