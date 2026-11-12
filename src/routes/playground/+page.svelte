@@ -3,7 +3,6 @@
   import Playground from "#lib/playground/App.svelte";
   import { State } from "#lib/playground/lib/app.svelte.js";
   import { type SharableState } from "#lib/playground/lib/share/codec.js";
-  import { browser } from "$app/env";
 
   let { data } = $props();
 
@@ -27,15 +26,9 @@
 </svelte:head>
 
 <div class="w-full h-dvh max-h-screen bg-zinc-900">
-  <!--
-    TODO: This has the same effective behaviour as the previous
-    await/then implementation. We want to remove this check so that
-    as much as possible is prerendered at build time. Currently we
-    avoid this as the prerender doesn't have an estimate for the size
-    of the editor etc elements and we don't want to avoid large content
-    shifts.
-  -->
-  {#if data.error}
+  {#if app !== undefined && data.error === null}
+    <Playground {app} />
+  {:else}
     <div
       class="flex h-full flex-col items-center justify-center gap-4 px-6 text-center text-zinc-400"
     >
@@ -52,12 +45,6 @@
       >
         Go to the main playground
       </a>
-    </div>
-  {:else if browser && app !== undefined}
-    <Playground {app} />
-  {:else}
-    <div class="flex h-full items-center justify-center text-zinc-400">
-      Loading playground …
     </div>
   {/if}
 </div>

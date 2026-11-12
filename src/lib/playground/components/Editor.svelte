@@ -239,7 +239,7 @@
 </script>
 
 <div
-  class="h-full w-full border-t-zinc-500"
+  class="h-full w-full border-t-zinc-500 bg-[#282c34]"
   id="editor"
   bind:this={element}
 ></div>
