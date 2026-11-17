@@ -6,6 +6,7 @@ export type SiteConfig = {
   github: string | null;
   spec: string;
   favicon: string;
+  languages: { name: string; url: string }[];
 };
 
 const NO_LOGO =
@@ -17,6 +18,10 @@ export const public_config = {
   github: "https://github.com/pure-py/pure-py-spec",
   spec: "https://pure-py.github.io/pure-py-spec/latest/PurePy-spec.pdf",
   favicon: "/favicon.png",
+  languages: [
+    { name: "Fluid", url: "https://f.luid.org" },
+    { name: "Fortl", url: "https://github.com/plas4sci/fortl" },
+  ],
 } satisfies SiteConfig;
 
 export const anon_config = {
@@ -25,4 +30,5 @@ export const anon_config = {
   github: null,
   spec: "/spec-anon.pdf",
   favicon: NO_LOGO,
+  languages: [],
 } satisfies SiteConfig;
