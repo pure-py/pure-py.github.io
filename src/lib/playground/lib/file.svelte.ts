@@ -7,6 +7,7 @@ export type StaticFile = {
 };
 
 export type ReadonlyFile = {
+  readonly id: symbol;
   readonly path: string;
   readonly data: string;
   readonly buffer: string;
@@ -14,6 +15,9 @@ export type ReadonlyFile = {
 };
 
 export class File {
+  // Identity preserved by rename
+  readonly id = Symbol();
+
   #path: string;
   #data: string;
   #buffer: string;
@@ -30,6 +34,7 @@ export class File {
     this.#dirty = $state(false);
 
     this.info = $derived({
+      id: this.id,
       path: this.#path,
       data: this.#data,
       buffer: this.#buffer,

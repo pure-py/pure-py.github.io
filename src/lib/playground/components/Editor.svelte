@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { StateEffect, StateField, RangeSetBuilder } from "@codemirror/state";
+  import {
+    EditorState,
+    StateEffect,
+    StateField,
+    RangeSetBuilder,
+  } from "@codemirror/state";
   import { Decoration, EditorView, WidgetType } from "@codemirror/view";
   import { onMount } from "svelte";
   import type { State } from "../lib/app.svelte";
@@ -112,21 +117,21 @@
       import("@codemirror/theme-one-dark"),
     ]);
 
+    const extensions = [
+      basicSetup,
+      oneDark,
+      inline_diagnostics,
+      inline_diagnostic_decorations,
+      EditorView.theme({
+        "&": {
+          height: "100%",
+          fontSize: "14px",
+        },
+      }),
+      python(),
+    ];
+
     const _view = new EditorView({
-      doc: app.buffer,
-      extensions: [
-        basicSetup,
-        oneDark,
-        inline_diagnostics,
-        inline_diagnostic_decorations,
-        EditorView.theme({
-          "&": {
-            height: "100%",
-            fontSize: "14px",
-          },
-        }),
-        python(),
-      ],
       parent: element,
 
       dispatchTransactions: (txs, editor_view) => {
@@ -137,17 +142,44 @@
 
     view = _view;
 
-    app.register_editor({
-      set_doc: (data: string) => {
-        const transaction = _view.state.update({
-          changes: {
-            from: 0,
-            to: _view.state.doc.length,
-            insert: data,
-          },
-        });
+    // Editor state and scroll position of each file at last switch to another file
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- not reactive state
+    const saved = new Map<
+      symbol,
+      { state: EditorState; scroll: StateEffect<unknown> }
+    >();
 
-        _view.dispatch(transaction);
+    // File shown in editor; undefined before first file opens and after shown file closes
+    let active: symbol | undefined;
+
+    app.register_editor({
+      open: (file) => {
+        if (active !== undefined) {
+          saved.set(active, {
+            state: _view.state,
+            scroll: _view.scrollSnapshot(),
+          });
+        }
+
+        active = file.id;
+
+        const restored = saved.get(file.id);
+
+        if (restored === undefined) {
+          _view.setState(EditorState.create({ doc: file.buffer, extensions }));
+          _view.scrollDOM.scrollTo(0, 0);
+        } else {
+          _view.setState(restored.state);
+          _view.dispatch({ effects: restored.scroll });
+        }
+      },
+
+      close: (file) => {
+        saved.delete(file.id);
+
+        if (active === file.id) {
+          active = undefined;
+        }
       },
 
       set_diagnostics: (diagnostics) => {

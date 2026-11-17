@@ -1,6 +1,6 @@
 import { to_nonempty, type NonEmpty } from "#lib/utils/non-empty.js";
 import { once } from "#lib/utils/once.js";
-import { type StaticFile, FileSystem } from "./file.svelte";
+import { type ReadonlyFile, type StaticFile, FileSystem } from "./file.svelte";
 import { type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
@@ -27,7 +27,8 @@ type EditorDiagnostic = {
 };
 
 type Editor = {
-  set_doc: (str: string) => void;
+  open: (file: ReadonlyFile) => void;
+  close: (file: ReadonlyFile) => void;
   set_diagnostics: (diagnostics: EditorDiagnostic[]) => void;
 };
 
@@ -109,13 +110,14 @@ export class State {
   register_editor = once((editor: Editor) => {
     this.#editor = editor;
 
-    editor.set_doc(this.#fs.buffer);
-    this.refresh_editor_diagnostics();
-
-    this.#fs.add_hook("open", (file) => {
-      editor.set_doc(file.buffer);
+    const open = (file: ReadonlyFile) => {
+      editor.open(file);
       this.refresh_editor_diagnostics();
-    });
+    };
+
+    open(this.#fs.file(this.#fs.active_fd));
+    this.#fs.add_hook("open", open);
+    this.#fs.add_hook("delete", editor.close);
   });
 
   register_purepy = once((purepy: PurePy) => {
