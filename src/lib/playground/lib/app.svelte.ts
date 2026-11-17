@@ -27,7 +27,7 @@ type EditorDiagnostic = {
 };
 
 type Editor = {
-  open: (file: ReadonlyFile) => void;
+  open: (previous: ReadonlyFile, file: ReadonlyFile) => void;
   close: (file: ReadonlyFile) => void;
   set_diagnostics: (diagnostics: EditorDiagnostic[]) => void;
 };
@@ -106,13 +106,12 @@ export class State {
   register_editor = once((editor: Editor) => {
     this.#editor = editor;
 
-    const open = (file: ReadonlyFile) => {
-      editor.open(file);
-      this.refresh_editor_diagnostics();
-    };
+    this.refresh_editor_diagnostics();
 
-    open(this.#fs.active_file);
-    this.#fs.add_hook("open", open);
+    this.#fs.add_hook("open", (previous, file) => {
+      editor.open(previous, file);
+      this.refresh_editor_diagnostics();
+    });
     this.#fs.add_hook("delete", editor.close);
   });
 

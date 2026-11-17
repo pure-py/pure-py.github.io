@@ -204,9 +204,10 @@ export class FileSystem {
   // Index methods
 
   open = (fd: number): ReadonlyFile => {
+    const previous = this.#active_file;
     const file = this.#file(fd);
     this.#active_fd = fd;
-    this.run_hooks("open", file.info);
+    this.run_hooks("open", previous.info, file.info);
     return file.info;
   };
 
@@ -226,21 +227,19 @@ export class FileSystem {
 
     const file = this.#file(fd);
 
-    const is_active = fd === this.#active_fd;
-    const is_last = fd === this.last_index();
+    // Open a neighbouring file in place of the active file
+    if (fd === this.#active_fd) {
+      this.open(fd === this.last_index() ? fd - 1 : fd + 1);
+    }
 
     this.#files.splice(fd, 1);
 
-    this.run_hooks("delete", file.info);
-
-    // Keep the active index valid:
-    // - removing a file before the active file shifts later indices left
-    // - removing the active file selects a neighbouring file
+    // Keep the active index on its file, since removal shifts later indices left
     if (fd < this.#active_fd) {
       this.#active_fd -= 1;
-    } else if (is_active) {
-      this.open(is_last ? fd - 1 : fd);
     }
+
+    this.run_hooks("delete", file.info);
 
     return file.info;
   };

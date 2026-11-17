@@ -131,7 +131,11 @@
       python(),
     ];
 
+    const initial_state = (doc: string) =>
+      EditorState.create({ doc, extensions });
+
     const _view = new EditorView({
+      state: initial_state(app.buffer),
       parent: element,
 
       dispatchTransactions: (txs, editor_view) => {
@@ -149,24 +153,17 @@
       { state: EditorState; scroll: StateEffect<unknown> }
     >();
 
-    // File shown in editor; undefined before first file opens and after shown file closes
-    let active: symbol | undefined;
-
     app.register_editor({
-      open: (file) => {
-        if (active !== undefined) {
-          saved.set(active, {
-            state: _view.state,
-            scroll: _view.scrollSnapshot(),
-          });
-        }
-
-        active = file.id;
+      open: (previous, file) => {
+        saved.set(previous.id, {
+          state: _view.state,
+          scroll: _view.scrollSnapshot(),
+        });
 
         const restored = saved.get(file.id);
 
         if (restored === undefined) {
-          _view.setState(EditorState.create({ doc: file.buffer, extensions }));
+          _view.setState(initial_state(file.buffer));
           _view.scrollDOM.scrollTo(0, 0);
         } else {
           _view.setState(restored.state);
@@ -176,10 +173,6 @@
 
       close: (file) => {
         saved.delete(file.id);
-
-        if (active === file.id) {
-          active = undefined;
-        }
       },
 
       set_diagnostics: (diagnostics) => {
