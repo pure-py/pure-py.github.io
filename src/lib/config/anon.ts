@@ -35,9 +35,7 @@ const anonymised = (macro: string) => {
   const [macros] = Object.values(spec_macros);
 
   if (macros === undefined) {
-    throw new Error(
-      "Specification macros missing; run scripts/download-spec.sh with ANONYMOUS=true",
-    );
+    throw new Error("Specification macros missing");
   }
 
   const definition = macros
