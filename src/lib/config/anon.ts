@@ -24,19 +24,26 @@ export const public_config = {
   ],
 } satisfies SiteConfig;
 
-const spec_macros = import.meta.glob<string>("../spec/macros.tex", {
+const spec_files = import.meta.glob<string>("../spec/*", {
   query: "?raw",
   import: "default",
   eager: true,
 });
 
+// Specification file downloaded for the anonymous build
+const spec_file = (name: string) => {
+  const file = spec_files[`../spec/${name}`];
+
+  if (file === undefined) {
+    throw new Error(`Specification file ${name} missing`);
+  }
+
+  return file;
+};
+
 // Name given to a language by the specification macros in anonymous mode
 const anonymised = (macro: string) => {
-  const [macros] = Object.values(spec_macros);
-
-  if (macros === undefined) {
-    throw new Error("Specification macros missing");
-  }
+  const macros = spec_file("macros.tex");
 
   const definition = macros
     .slice(macros.indexOf("\\ifdefined\\anonmode"), macros.indexOf("\\else"))
@@ -54,7 +61,7 @@ const anonymised = (macro: string) => {
 };
 
 export const anon_config = (): SiteConfig => ({
-  name: "OurLang",
+  name: spec_file("anon-name").trim(),
   logo: NO_LOGO,
   github: null,
   spec: "/spec-anon.pdf",
