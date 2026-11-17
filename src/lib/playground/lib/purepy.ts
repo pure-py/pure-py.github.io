@@ -136,7 +136,7 @@ export class PurePy {
       import pathlib
       import time
 
-      from purepy.check_program import ( check_program )
+      from purepy.check_program import ( check_program, error_path )
 
       path = pathlib.Path("${path}")
 
@@ -145,12 +145,17 @@ export class PurePy {
       end = time.perf_counter_ns()
       elapsed = (end - start) // 1_000_000 # milliseconds
 
-      { "diagnostic": diagnostic, "elapsed": elapsed }
+      error = None if diagnostic is None else {
+          "diagnostic": diagnostic,
+          "file": str(error_path(diagnostic, path)),
+      }
+
+      { "error": error, "elapsed": elapsed }
     `);
 
-    const { diagnostic, elapsed } = PurePyCheckResult.parse(result);
+    const { error, elapsed } = PurePyCheckResult.parse(result);
 
-    if (diagnostic === undefined) {
+    if (error === undefined) {
       return {
         success: true,
         time: elapsed,
@@ -160,10 +165,10 @@ export class PurePy {
         success: false,
         time: elapsed,
         error: {
-          file: path,
-          line: diagnostic.position?.line ?? null,
-          col: diagnostic.position?.col ?? null,
-          message: diagnostic.message,
+          file: error.file,
+          line: error.diagnostic.position?.line ?? null,
+          col: error.diagnostic.position?.col ?? null,
+          message: error.diagnostic.message,
         },
       } as const;
     }
