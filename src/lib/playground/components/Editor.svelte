@@ -166,6 +166,12 @@
           _view.setState(initial_state(file.buffer));
           _view.scrollDOM.scrollTo(0, 0);
         } else {
+          if (restored.state.doc.toString() !== file.buffer) {
+            throw new Error(
+              `Saved editor state of “${file.path}” differs from buffer`,
+            );
+          }
+
           _view.setState(restored.state);
           _view.dispatch({ effects: restored.scroll });
         }
