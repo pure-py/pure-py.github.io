@@ -82,10 +82,6 @@ export class State {
     return this.#stdout;
   }
 
-  get current_file(): string | null {
-    return this.#fs.files[this.#fs.active_fd]?.path ?? null;
-  }
-
   get fs() {
     return {
       files: this.#fs.files,
@@ -115,7 +111,7 @@ export class State {
       this.refresh_editor_diagnostics();
     };
 
-    open(this.#fs.file(this.#fs.active_fd));
+    open(this.#fs.active_file);
     this.#fs.add_hook("open", open);
     this.#fs.add_hook("delete", editor.close);
   });
@@ -205,15 +201,10 @@ export class State {
   };
 
   refresh_editor_diagnostics = () => {
-    const active_file = this.current_file;
-
-    if (active_file === null) {
-      this.#editor?.set_diagnostics([]);
-      return;
-    }
+    const { path } = this.#fs.active_file;
 
     this.#editor?.set_diagnostics(
-      this.diagnostics.filter((diagnostic) => diagnostic.file === active_file),
+      this.diagnostics.filter((diagnostic) => diagnostic.file === path),
     );
   };
 
@@ -250,9 +241,7 @@ export class State {
 
       const output_start = this.#stdout.lines.length;
 
-      const { success, elapsed } = purepy.evaluate(
-        this.#fs.file(this.#fs.active_fd),
-      );
+      const { success, elapsed } = purepy.evaluate(this.#fs.active_file);
 
       this.eval_result = { success, time: elapsed };
 

@@ -109,6 +109,10 @@ export class FileSystem {
     return this.#active_fd;
   }
 
+  get active_file() {
+    return this.#active_file.info;
+  }
+
   get files() {
     return nonempty_map(this.#files, (f) => f.info);
   }

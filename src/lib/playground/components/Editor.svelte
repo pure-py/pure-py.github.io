@@ -183,8 +183,6 @@
       },
 
       set_diagnostics: (diagnostics) => {
-        const active_file = app.current_file;
-
         const inline_diagnostics = diagnostics
           .filter(
             (
@@ -193,7 +191,6 @@
               line: number;
             } => diagnostic.line !== null,
           )
-          .filter((diagnostic) => diagnostic.file === active_file)
           .filter(
             (diagnostic) =>
               diagnostic.line >= 1 && diagnostic.line <= _view.state.doc.lines,
