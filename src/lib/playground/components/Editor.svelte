@@ -1,10 +1,5 @@
 <script lang="ts">
-  import {
-    StateEffect,
-    StateField,
-    RangeSetBuilder,
-    Transaction,
-  } from "@codemirror/state";
+  import { StateEffect, StateField, RangeSetBuilder } from "@codemirror/state";
   import { Decoration, EditorView, WidgetType } from "@codemirror/view";
   import { onMount } from "svelte";
   import type { State } from "../lib/app.svelte";
@@ -51,55 +46,18 @@
     }
   }
 
-  const is_undo = (transaction: Transaction) => {
-    const user_event = transaction.annotation(Transaction.userEvent);
-
-    return user_event === "undo" || user_event?.startsWith("undo.") === true;
-  };
-
   const inline_diagnostics = StateField.define<InlineDiagnostic[]>({
     create: () => [],
 
     update(diagnostics, transaction) {
       if (transaction.docChanged) {
-        if (is_undo(transaction)) {
-          const inverse_changes = transaction.changes.invert(
-            transaction.startState.doc,
-          );
-
-          diagnostics = diagnostics.map((diagnostic) => ({
+        diagnostics = diagnostics
+          .filter(({ from, to }) => !transaction.changes.touchesRange(from, to))
+          .map((diagnostic) => ({
             ...diagnostic,
-            from: inverse_changes.mapPos(diagnostic.from, 1),
-            to: inverse_changes.mapPos(diagnostic.to, 1),
+            from: transaction.changes.mapPos(diagnostic.from, 1),
+            to: transaction.changes.mapPos(diagnostic.to, 1),
           }));
-        } else {
-          const kept_diagnostics: InlineDiagnostic[] = [];
-
-          for (const diagnostic of diagnostics) {
-            let invalidated = false;
-
-            transaction.changes.iterChangedRanges((from_a, to_a) => {
-              if (invalidated) return;
-
-              const touches_diagnostic_region =
-                from_a <= diagnostic.to && to_a >= diagnostic.from;
-
-              if (touches_diagnostic_region) {
-                invalidated = true;
-              }
-            });
-
-            if (!invalidated) {
-              kept_diagnostics.push({
-                ...diagnostic,
-                from: transaction.changes.mapPos(diagnostic.from, 1),
-                to: transaction.changes.mapPos(diagnostic.to, 1),
-              });
-            }
-          }
-
-          diagnostics = kept_diagnostics;
-        }
       }
 
       for (const effect of transaction.effects) {
