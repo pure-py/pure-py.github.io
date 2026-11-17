@@ -28,9 +28,12 @@ export class File {
   constructor(path: string, data: string) {
     validate_filename(path);
 
+    // Normalise line endings, since the editor document holds line feeds only
+    const text = data.replace(/\r\n?/g, "\n");
+
     this.#path = $state(path);
-    this.#data = $state(data);
-    this.#buffer = $state(data);
+    this.#data = $state(text);
+    this.#buffer = $state(text);
     this.#dirty = $state(false);
 
     this.info = $derived({
