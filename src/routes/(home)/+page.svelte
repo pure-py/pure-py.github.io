@@ -94,11 +94,13 @@
       <h3>Portable</h3>
       <p>
         Python dialects are compliant by definition, checked on CPython, PyPy,
-        GraalPy and Pyodide. Research languages like <a
-          href="https://f.luid.org">Fluid</a
-        >
-        and
-        <a href="https://github.com/plas4sci/fortl">Fortl</a> can be too.
+        GraalPy and Pyodide. Research languages like
+        {#each data.config.languages as language, index (language.name)}
+          {index > 0 ? " and " : ""}{#if language.url}<a href={language.url}
+              >{language.name}</a
+            >{:else}{language.name}{/if}
+        {/each}
+        can be too.
       </p>
     </div>
     <div class="card">

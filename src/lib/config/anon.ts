@@ -6,6 +6,7 @@ export type SiteConfig = {
   github: string | null;
   spec: string;
   favicon: string;
+  languages: { name: string; url: string | null }[];
 };
 
 const NO_LOGO =
@@ -17,12 +18,56 @@ export const public_config = {
   github: "https://github.com/pure-py/pure-py-spec",
   spec: "https://pure-py.github.io/pure-py-spec/latest/PurePy-spec.pdf",
   favicon: "/favicon.png",
+  languages: [
+    { name: "Fluid", url: "https://f.luid.org" },
+    { name: "Fortl", url: "https://github.com/plas4sci/fortl" },
+  ],
 } satisfies SiteConfig;
 
-export const anon_config = {
-  name: "OurLang",
+const spec_files = import.meta.glob<string>("../spec/*", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
+// Specification file downloaded for the anonymous build
+const spec_file = (name: string) => {
+  const file = spec_files[`../spec/${name}`];
+
+  if (file === undefined) {
+    throw new Error(`Specification file ${name} missing`);
+  }
+
+  return file;
+};
+
+// Name given to a language by the specification macros in anonymous mode
+const anonymised = (macro: string) => {
+  const macros = spec_file("macros.tex");
+
+  const definition = macros
+    .slice(macros.indexOf("\\ifdefined\\anonmode"), macros.indexOf("\\else"))
+    .match(
+      new RegExp(`\\\\newcommand\\*\\{\\\\${macro}\\}\\{(.*)\\\\xspace\\}`),
+    );
+
+  if (definition === null) {
+    throw new Error(
+      `Anonymised name of \\${macro} undefined in specification macros`,
+    );
+  }
+
+  return definition[1]!;
+};
+
+export const anon_config = (): SiteConfig => ({
+  name: spec_file("anon-name").trim(),
   logo: NO_LOGO,
   github: null,
   spec: "/spec-anon.pdf",
   favicon: NO_LOGO,
-} satisfies SiteConfig;
+  languages: [
+    { name: anonymised("Cosi"), url: null },
+    { name: anonymised("Fluid"), url: null },
+  ],
+});
