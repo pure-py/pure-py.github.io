@@ -81,7 +81,10 @@
   <div class="grid">
     <div class="card">
       <h3>Pure &amp; functional</h3>
-      <p>Mutation-free; functions are referentially transparent.</p>
+      <p>
+        Mutation-free; functions are referentially transparent; all variable
+        resolution is static.
+      </p>
     </div>
     <div class="card">
       <h3>Statically typed</h3>
