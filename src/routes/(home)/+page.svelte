@@ -26,10 +26,11 @@
 <section id="overview" class="prose">
   <h2>Overview</h2>
   <p>
-    {data.config.name} defines a pure, mutation-free subset of Python. It is aimed
-    initially at researchers in programming languages and computer science education,
-    and is intended to grow into a common language for scientific computing, supporting
-    portable applications in modelling, data processing, analysis, and visualisation.
+    {data.config.name} defines a pure, mutation-free subset of Python. The subset
+    is aimed initially at researchers in programming languages and computer science
+    education, and is intended to grow into a common language for scientific computing,
+    supporting portable applications in modelling, data processing, analysis, and
+    visualisation.
   </p>
   <p>
     The standard defines a versioned formal grammar, a formal semantics, and a
