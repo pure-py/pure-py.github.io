@@ -175,9 +175,7 @@ section {
   font-size: 0.85rem;
   font-style: italic;
   line-height: 1.5;
-  margin: 0.6rem auto 0;
-  max-width: 68ch;
-  text-align: center;
+  margin-top: 0.6rem;
 }
 .code-sample figcaption code {
   font-family: var(--mono);
