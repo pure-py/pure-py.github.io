@@ -124,8 +124,7 @@
       <h3>For science and education</h3>
       <p>
         Reproducible, deterministic, and easy to reason about, for researchers
-        developing new Python-based languages or for students learning to
-        program.
+        developing new Python-based languages or students learning to program.
       </p>
     </div>
   </div>
