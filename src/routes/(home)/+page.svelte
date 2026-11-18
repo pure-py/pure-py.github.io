@@ -117,7 +117,7 @@
               >{language.name}</a
             >{:else}{language.name}{/if}
         {/each}
-        can be too.
+        are too.
       </p>
     </div>
     <div class="card">
