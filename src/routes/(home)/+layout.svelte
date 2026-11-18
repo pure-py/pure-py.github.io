@@ -37,6 +37,6 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <p>© {data.config.name} contributors</p>
+    <p>© 2026 {data.config.name} contributors</p>
   </div>
 </footer>
