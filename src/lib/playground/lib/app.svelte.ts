@@ -5,7 +5,7 @@ import { type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
 import { formatted_time } from "#lib/utils/time.ts";
-import { example_files } from "#lib/server/files/example.ts";
+import { example_files } from "#lib/config/files/example.ts";
 
 type EditorDiagnostic = {
   file: string | null;

@@ -6,7 +6,7 @@ import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 import { PurePyCheckResult, PurePyEvalResult } from "./purepy/result";
-import { checker_files } from "#lib/server/files/checker.ts";
+import { checker_files } from "#lib/config/files/checker.ts";
 
 export class PurePy {
   private pyodide: PyodideAPI;

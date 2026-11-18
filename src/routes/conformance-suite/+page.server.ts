@@ -1,4 +1,4 @@
-import { registry } from "#lib/server/files/conformance.ts";
+import { registry } from "#lib/config/files/conformance.ts";
 
 export const load = async () => {
   const tests = registry.list();

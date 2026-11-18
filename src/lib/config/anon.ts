@@ -1,6 +1,6 @@
 import logo from "#lib/assets/image/logo.png";
 import { SPEC_VERSION } from "#lib/server/purepy.js";
-import { spec_file } from "#lib/server/files/spec.ts";
+import { spec_file } from "#lib/config/files/spec.ts";
 
 export type SiteConfig = {
   name: string;
