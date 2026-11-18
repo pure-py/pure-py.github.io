@@ -70,9 +70,9 @@
         >, <span class="tok-num">4</span>)))</code
       ></pre>
     <figcaption>
-      The declaration <code>kind: str</code> is mandatory. Later assignments to
-      <code>kind</code> are treated as deferred initialisation, as for blank final
-      variables in Java. Reassignment on a given branch is therefore not permitted.
+      The declaration <code>kind: str</code> is mandatory. As with blank final
+      variables in Java, later assignments to <code>kind</code> are treated as deferred
+      initialisation. Reassignment on a given branch is therefore not permitted.
     </figcaption>
   </figure>
 </section>
