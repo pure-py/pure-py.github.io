@@ -1,5 +1,5 @@
 import logo from "#lib/assets/image/logo.png";
-import pinned_version from "../../../.purepy-version?raw";
+import { PUREPY_VERSION } from "#lib/playground/lib/purepy/version.js";
 
 export type SiteConfig = {
   name: string;
@@ -12,14 +12,12 @@ export type SiteConfig = {
   languages: { name: string; url: string | null }[];
 };
 
-const version = pinned_version.trim();
-
 const NO_LOGO =
   "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
 export const public_config = {
   name: "PurePy",
-  version,
+  version: PUREPY_VERSION,
   logo,
   github: "https://github.com/pure-py/pure-py-spec",
   spec: "/PurePy-spec.pdf",
@@ -68,7 +66,7 @@ const anonymised = (macro: string) => {
 
 export const anon_config = (): SiteConfig => ({
   name: spec_file("anon-name").trim(),
-  version,
+  version: PUREPY_VERSION,
   logo: NO_LOGO,
   github: null,
   spec: "/spec-anon.pdf",
