@@ -70,8 +70,8 @@
       ></pre>
     <figcaption>
       The declaration <code>kind: str</code> is mandatory. Later assignments to
-      <code>kind</code> are treated as deferred initialisation, as for a blank final
-      variable in Java. Reassignment on a given branch is therefore not permitted.
+      <code>kind</code> are treated as deferred initialisation, as for blank final
+      variables in Java. Reassignment on a given branch is therefore not permitted.
     </figcaption>
   </figure>
 </section>
