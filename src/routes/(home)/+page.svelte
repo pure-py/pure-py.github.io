@@ -117,8 +117,12 @@
       </p>
     </div>
     <div class="card">
-      <h3>For science</h3>
-      <p>Reproducible, deterministic, and easy to reason about.</p>
+      <h3>For science and education</h3>
+      <p>
+        Reproducible, deterministic, and easy to reason about, for researchers
+        developing new Python-based languages and for students learning to
+        program.
+      </p>
     </div>
   </div>
 </section>
