@@ -68,9 +68,8 @@
       >, <span class="tok-num">4</span>)))</code
     ></pre>
   <p class="caption">
-    The declaration <code>kind: str</code> is mandatory. Each later assignment
-    to
-    <code>kind</code> is then treated as a deferred initialisation, like an assignment
+    The declaration <code>kind: str</code> is mandatory. Later assignments to
+    <code>kind</code> are then treated as deferred initialisation, like assignments
     to a blank final variable in Java, so reassignment on the same branch is not permitted.
   </p>
 </section>
