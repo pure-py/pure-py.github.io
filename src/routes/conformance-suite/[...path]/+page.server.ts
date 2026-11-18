@@ -1,4 +1,4 @@
-import { registry } from "#lib/conformance/files.js";
+import { registry } from "#lib/server/files/conformance.ts";
 import { error } from "@sveltejs/kit";
 
 export const load = async ({ params }) => {

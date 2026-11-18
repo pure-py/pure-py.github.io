@@ -6,25 +6,7 @@ import type { Stdout } from "./stdout.svelte";
 import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 import { PurePyCheckResult, PurePyEvalResult } from "./purepy/result";
-
-import check_wrapper from "#lib/python/check.py?raw";
-import run_wrapper from "#lib/python/run.py?raw";
-import conformance_init from "#vendor/python/purepy_conformance/__init__.py?raw";
-import figure_numbers from "#vendor/python/purepy_conformance/figure-numbers.json?raw";
-
-const checker_sources = import.meta.glob<string>("./purepy/**/*.py", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-  base: "/src/vendor/python",
-});
-
-const checker_files = Object.fromEntries(
-  Object.entries(checker_sources).map(([file, source]) => {
-    const relative_path = file.replace(/^.*\/purepy?/, "purepy");
-    return [relative_path, source];
-  }),
-);
+import { checker_files } from "#lib/server/files/checker.ts";
 
 export class PurePy {
   private pyodide: PyodideAPI;
@@ -36,20 +18,12 @@ export class PurePy {
 
     this.pyodide.FS.mkdirTree(PUREPY_DIR);
 
-    const source_files = [
-      ...Object.entries(checker_files),
-      ["internal_helpers/check.py", check_wrapper],
-      ["internal_helpers/run.py", run_wrapper],
-      ["purepy_conformance/__init__.py", conformance_init],
-      ["purepy_conformance/figure-numbers.json", figure_numbers],
-    ];
-
-    for (const [relative_path, source] of source_files) {
-      const path = `${PUREPY_DIR}/${relative_path}`;
+    for (const file of checker_files) {
+      const path = `${PUREPY_DIR}/${file.path}`;
       const directory = path.split("/").slice(0, -1).join("/");
 
       this.pyodide.FS.mkdirTree(directory);
-      this.pyodide.FS.writeFile(path, source);
+      this.pyodide.FS.writeFile(path, file.data);
     }
 
     this.pyodide.FS.mkdirTree("user");

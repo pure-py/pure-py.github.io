@@ -1,5 +1,6 @@
 import logo from "#lib/assets/image/logo.png";
 import { SPEC_VERSION } from "#lib/server/purepy.js";
+import { spec_file } from "#lib/server/files/spec.ts";
 
 export type SiteConfig = {
   name: string;
@@ -27,24 +28,6 @@ export const public_config = {
     { name: "Fortl", url: "https://github.com/plas4sci/fortl" },
   ],
 } satisfies SiteConfig;
-
-const spec_files = import.meta.glob<string>("./*", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-  base: "/src/vendor/spec",
-});
-
-// Specification file downloaded for the anonymous build
-const spec_file = (name: string) => {
-  const file = spec_files[`./${name}`];
-
-  if (file === undefined) {
-    throw new Error(`Specification file ${name} missing`);
-  }
-
-  return file;
-};
 
 // Name given to a language by the specification macros in anonymous mode
 const anonymised = (macro: string) => {

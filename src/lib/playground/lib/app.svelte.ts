@@ -1,24 +1,11 @@
-import { to_nonempty, type NonEmpty } from "#lib/utils/non-empty.js";
+import { type NonEmpty } from "#lib/utils/non-empty.js";
 import { once } from "#lib/utils/once.js";
 import { type ReadonlyFile, type StaticFile, FileSystem } from "./file.svelte";
 import { type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
 import { formatted_time } from "#lib/utils/time.ts";
-
-const example_sources = import.meta.glob("./**/*.py", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-  base: "/src/lib/python/example",
-}) as Record<string, string>;
-
-const example_files: StaticFile[] = Object.entries(example_sources)
-  .map(([file, data]) => ({
-    path: file.replace(/^\.\//, ""),
-    data,
-  }))
-  .sort((a, b) => a.path.localeCompare(b.path));
+import { example_files } from "#lib/server/files/example.ts";
 
 type EditorDiagnostic = {
   file: string | null;
@@ -63,7 +50,7 @@ export class State {
   }
 
   static default = () => {
-    return new State(to_nonempty(example_files));
+    return new State(example_files);
   };
 
   static from = (state: SharableState) => {
