@@ -8,10 +8,7 @@
   );
 </script>
 
-<section id="top" class="hero">
-  <h1>
-    <img class="hero-logo" src={data.config.logo} alt={data.config.name} />
-  </h1>
+<section class="hero">
   <p class="tagline">
     A pure functional subset of Python for scientific computing
   </p>

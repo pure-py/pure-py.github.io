@@ -52,20 +52,16 @@ a:hover {
   gap: 1rem;
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 1.1rem 1.25rem;
+  padding: 2rem 1.25rem 0;
   flex-wrap: wrap;
 }
 .brand {
-  display: inline-flex;
-  align-items: center;
-}
-.brand:hover {
-  text-decoration: none;
+  margin: 0;
+  line-height: 0;
 }
 .brand-logo {
-  height: 26px;
+  height: clamp(60px, 12vw, 100px);
   width: auto;
-  display: block;
 }
 .site-nav {
   display: flex;
@@ -92,16 +88,7 @@ section {
 /* Hero */
 .hero {
   text-align: left;
-  padding-top: 3rem;
   padding-bottom: 1.75rem;
-}
-.hero h1 {
-  margin: 0 0 1.25rem;
-  line-height: 0;
-}
-.hero-logo {
-  height: clamp(60px, 12vw, 100px);
-  width: auto;
 }
 .hero .tagline {
   font-size: clamp(1.1rem, 3vw, 1.5rem);

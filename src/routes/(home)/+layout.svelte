@@ -17,9 +17,9 @@
 </svelte:head>
 
 <header class="site-header">
-  <a class="brand" href="#top"
-    ><img class="brand-logo" src={data.config.logo} alt={data.config.name} /></a
-  >
+  <h1 class="brand">
+    <img class="brand-logo" src={data.config.logo} alt={data.config.name} />
+  </h1>
   <nav class="site-nav">
     <a href={data.config.spec} target="_blank">Spec</a>
     {#if data.config.github}
