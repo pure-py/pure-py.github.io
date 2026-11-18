@@ -7,6 +7,8 @@ import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 import { PurePyCheckResult, PurePyEvalResult } from "./purepy/result";
 
+import check_wrapper from "#lib/python/check.py?raw";
+import run_wrapper from "#lib/python/run.py?raw";
 import conformance_init from "#vendor/python/purepy_conformance/__init__.py?raw";
 import figure_numbers from "#vendor/python/purepy_conformance/figure-numbers.json?raw";
 
@@ -36,6 +38,8 @@ export class PurePy {
 
     const source_files = [
       ...Object.entries(checker_files),
+      ["internal_helpers/check.py", check_wrapper],
+      ["internal_helpers/run.py", run_wrapper],
       ["purepy_conformance/__init__.py", conformance_init],
       ["purepy_conformance/figure-numbers.json", figure_numbers],
     ];
@@ -134,24 +138,8 @@ export class PurePy {
 
   check = (path: string) => {
     const result = this.run(`
-      import pathlib
-      import time
-
-      from purepy.check_program import ( check_program, error_path )
-
-      path = pathlib.Path("${path}")
-
-      start = time.perf_counter_ns()
-      diagnostic = check_program(path)
-      end = time.perf_counter_ns()
-      elapsed = (end - start) // 1_000_000 # milliseconds
-
-      error = None if diagnostic is None else {
-          "diagnostic": diagnostic,
-          "file": str(error_path(diagnostic, path)),
-      }
-
-      { "error": error, "elapsed": elapsed }
+      from internal_helpers.check import check
+      check("${path}")
     `);
 
     const { error, elapsed } = PurePyCheckResult.parse(result);
@@ -183,32 +171,9 @@ export class PurePy {
 
   evaluate = (file: ReadonlyFile) => {
     try {
-      // at this point we have already confirmed there is no parse
-      // error but we don't have the parsed program, so we run it
-      // again (a future version could reuse the check result here).
-      // we can't use the existing `run_program` because it uses threads.
-      // a program has no evaluation result except from the exit code
-      // and the collection of print outputs which we have captured
       const result = this.run(`
-        import pathlib
-        from purepy.run_program import ( check, evaluate, Diagnostic, format_diagnostic, exit_code )
-
-        def run_program(entry_path: pathlib.Path) -> int:
-            match check(entry_path):
-                case Diagnostic() as d:
-                    print(format_diagnostic(d, entry_path))
-                    return { "status": int(exit_code(d)), "elapsed": 0 }
-                case (M, sigma):
-                    pass
-
-            start = time.perf_counter_ns()
-            status = evaluate(sigma, M, [str(entry_path)], 100_000)
-            end = time.perf_counter_ns()
-            elapsed = (end - start) // 1_000_000 # milliseconds
-            return { "status": status, "elapsed": elapsed }
-
-
-        run_program(pathlib.Path("${file.path}"))
+        from internal_helpers.run import run
+        run("${file.path}")
       `);
 
       const { status, elapsed } = PurePyEvalResult.parse(result);
