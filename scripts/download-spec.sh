@@ -8,6 +8,6 @@ version=$(sed -n 's/^Version: //p' src/lib/python/purepy_conformance-*.dist-info
 sources="https://raw.githubusercontent.com/pure-py/pure-py-spec/v$version"
 
 curl -fL "https://pure-py.github.io/pure-py-spec/v$version/spec-anon.pdf" -o static/spec-anon.pdf
-mkdir -p src/lib/spec
-curl -fL "$sources/.anon-name" -o src/lib/spec/anon-name
-curl -fL "$sources/tex/macros.tex" -o src/lib/spec/macros.tex
+mkdir -p src/vendor/spec
+curl -fL "$sources/.anon-name" -o src/vendor/spec/anon-name
+curl -fL "$sources/tex/macros.tex" -o src/vendor/spec/macros.tex

@@ -7,13 +7,14 @@ import type { ReadonlyFile } from "./file.svelte";
 import { validate_filename, PUREPY_DIR } from "./paths";
 import { PurePyCheckResult, PurePyEvalResult } from "./purepy/result";
 
-import conformance_init from "#lib/python/purepy_conformance/__init__.py?raw";
-import figure_numbers from "#lib/python/purepy_conformance/figure-numbers.json?raw";
+import conformance_init from "#vendor/python/purepy_conformance/__init__.py?raw";
+import figure_numbers from "#vendor/python/purepy_conformance/figure-numbers.json?raw";
 
-const checker_sources = import.meta.glob<string>("#lib/python/purepy/**/*.py", {
+const checker_sources = import.meta.glob<string>("./purepy/**/*.py", {
   query: "?raw",
   import: "default",
   eager: true,
+  base: "/src/vendor/python",
 });
 
 const checker_files = Object.fromEntries(

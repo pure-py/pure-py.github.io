@@ -6,15 +6,16 @@ import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
 import { formatted_time } from "#lib/utils/time.ts";
 
-const example_sources = import.meta.glob("#lib/assets/examples/**/*.py", {
+const example_sources = import.meta.glob("./**/*.py", {
   query: "?raw",
   import: "default",
   eager: true,
+  base: "/src/lib/python/example",
 }) as Record<string, string>;
 
 const example_files: StaticFile[] = Object.entries(example_sources)
   .map(([file, data]) => ({
-    path: file.replace(/^.*assets\/examples\//, ""),
+    path: file.replace(/^\.\//, ""),
     data,
   }))
   .sort((a, b) => a.path.localeCompare(b.path));
