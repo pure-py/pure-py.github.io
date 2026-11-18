@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   let { data }: PageProps = $props();
+
+  // Major and minor version of the specification
+  const version = $derived(
+    data.config.version.split(".").slice(0, 2).join("."),
+  );
 </script>
 
 <section id="top" class="hero">
@@ -15,7 +20,9 @@
     reference implementation for a mutation-free subset of Python.
   </p>
   <div class="cta">
-    <a class="button primary" href={data.config.spec}>Read the spec</a>
+    <a class="button primary" href={data.config.spec}
+      >Read the v{version} spec</a
+    >
 
     {#if data.config.github}
       <a class="button" href={data.config.github}>GitHub</a>
