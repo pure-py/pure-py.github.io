@@ -40,10 +40,11 @@
 </section>
 
 <section class="code-sample">
-  <pre><code
-      ><span class="tok-kw">from</span> dataclasses <span class="tok-kw"
-        >import</span
-      > dataclass
+  <figure>
+    <pre><code
+        ><span class="tok-kw">from</span> dataclasses <span class="tok-kw"
+          >import</span
+        > dataclass
 
 <span class="tok-decorator">@dataclass</span>
 <span class="tok-kw">class</span> <span class="tok-class">Point</span>:
@@ -51,27 +52,29 @@
     y: <span class="tok-type">int</span>
 
 <span class="tok-kw">def</span> <span class="tok-fn">describe</span>(p: <span
-        class="tok-class">Point</span
-      >) -&gt; <span class="tok-type">str</span>:
+          class="tok-class">Point</span
+        >) -&gt; <span class="tok-type">str</span>:
     kind: <span class="tok-type">str</span>
     <span class="tok-kw">match</span> p:
         <span class="tok-kw">case</span> <span class="tok-class">Point</span
-      >(<span class="tok-num">0</span>, <span class="tok-num">0</span>):
+        >(<span class="tok-num">0</span>, <span class="tok-num">0</span>):
             kind = <span class="tok-str">"origin"</span>
         <span class="tok-kw">case</span> <span class="tok-class">Point</span
-      >(x, y):
+        >(x, y):
             kind = <span class="tok-str">"point"</span>
     <span class="tok-kw">return</span> kind
 
 <span class="tok-builtin">print</span>(<span class="tok-fn">describe</span
-      >(<span class="tok-class">Point</span>(<span class="tok-num">3</span
-      >, <span class="tok-num">4</span>)))</code
-    ></pre>
-  <p class="caption">
-    The declaration <code>kind: str</code> is mandatory. Later assignments to
-    <code>kind</code> are then treated as deferred initialisation, like assignments
-    to a blank final variable in Java, so reassignment on the same branch is not permitted.
-  </p>
+        >(<span class="tok-class">Point</span>(<span class="tok-num">3</span
+        >, <span class="tok-num">4</span>)))</code
+      ></pre>
+    <figcaption>
+      The declaration <code>kind: str</code> is mandatory. Later assignments to
+      <code>kind</code> are then treated as deferred initialisation, like assignments
+      to a blank final variable in Java, so reassignment on the same branch is not
+      permitted.
+    </figcaption>
+  </figure>
 </section>
 
 <section id="features" class="features">
