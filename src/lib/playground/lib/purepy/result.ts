@@ -45,7 +45,13 @@ export const PurePyDiagnostic = z.object({
 });
 
 export const PurePyCheckResult = z.object({
-  diagnostic: z.optional(PurePyDiagnostic),
+  error: z.optional(
+    z.object({
+      diagnostic: PurePyDiagnostic,
+      // File of the module at fault
+      file: z.string(),
+    }),
+  ),
   elapsed: z.number(),
 });
 

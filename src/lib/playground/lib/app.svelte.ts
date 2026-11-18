@@ -1,6 +1,6 @@
 import { to_nonempty, type NonEmpty } from "#lib/utils/non-empty.js";
 import { once } from "#lib/utils/once.js";
-import { type StaticFile, FileSystem } from "./file.svelte";
+import { type ReadonlyFile, type StaticFile, FileSystem } from "./file.svelte";
 import { type PurePy } from "./purepy";
 import type { SharableState } from "./share/codec";
 import { Stdout } from "./stdout.svelte";
@@ -27,7 +27,8 @@ type EditorDiagnostic = {
 };
 
 type Editor = {
-  set_doc: (str: string) => void;
+  open: (previous: ReadonlyFile, file: ReadonlyFile) => void;
+  close: (file: ReadonlyFile) => void;
   set_diagnostics: (diagnostics: EditorDiagnostic[]) => void;
 };
 
@@ -81,10 +82,6 @@ export class State {
     return this.#stdout;
   }
 
-  get current_file(): string | null {
-    return this.#fs.files[this.#fs.active_fd]?.path ?? null;
-  }
-
   get fs() {
     return {
       files: this.#fs.files,
@@ -109,13 +106,13 @@ export class State {
   register_editor = once((editor: Editor) => {
     this.#editor = editor;
 
-    editor.set_doc(this.#fs.buffer);
     this.refresh_editor_diagnostics();
 
-    this.#fs.add_hook("open", (file) => {
-      editor.set_doc(file.buffer);
+    this.#fs.add_hook("open", (previous, file) => {
+      editor.open(previous, file);
       this.refresh_editor_diagnostics();
     });
+    this.#fs.add_hook("delete", editor.close);
   });
 
   register_purepy = once((purepy: PurePy) => {
@@ -203,15 +200,10 @@ export class State {
   };
 
   refresh_editor_diagnostics = () => {
-    const active_file = this.current_file;
-
-    if (active_file === null) {
-      this.#editor?.set_diagnostics([]);
-      return;
-    }
+    const { path } = this.#fs.active_file;
 
     this.#editor?.set_diagnostics(
-      this.diagnostics.filter((diagnostic) => diagnostic.file === active_file),
+      this.diagnostics.filter((diagnostic) => diagnostic.file === path),
     );
   };
 
@@ -248,9 +240,7 @@ export class State {
 
       const output_start = this.#stdout.lines.length;
 
-      const { success, elapsed } = purepy.evaluate(
-        this.#fs.file(this.#fs.active_fd),
-      );
+      const { success, elapsed } = purepy.evaluate(this.#fs.active_file);
 
       this.eval_result = { success, time: elapsed };
 

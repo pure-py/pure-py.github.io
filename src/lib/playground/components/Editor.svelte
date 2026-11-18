@@ -1,9 +1,9 @@
 <script lang="ts">
   import {
+    EditorState,
     StateEffect,
     StateField,
     RangeSetBuilder,
-    Transaction,
   } from "@codemirror/state";
   import { Decoration, EditorView, WidgetType } from "@codemirror/view";
   import { onMount } from "svelte";
@@ -51,55 +51,18 @@
     }
   }
 
-  const is_undo = (transaction: Transaction) => {
-    const user_event = transaction.annotation(Transaction.userEvent);
-
-    return user_event === "undo" || user_event?.startsWith("undo.") === true;
-  };
-
   const inline_diagnostics = StateField.define<InlineDiagnostic[]>({
     create: () => [],
 
     update(diagnostics, transaction) {
       if (transaction.docChanged) {
-        if (is_undo(transaction)) {
-          const inverse_changes = transaction.changes.invert(
-            transaction.startState.doc,
-          );
-
-          diagnostics = diagnostics.map((diagnostic) => ({
+        diagnostics = diagnostics
+          .filter(({ from, to }) => !transaction.changes.touchesRange(from, to))
+          .map((diagnostic) => ({
             ...diagnostic,
-            from: inverse_changes.mapPos(diagnostic.from, 1),
-            to: inverse_changes.mapPos(diagnostic.to, 1),
+            from: transaction.changes.mapPos(diagnostic.from, 1),
+            to: transaction.changes.mapPos(diagnostic.to, 1),
           }));
-        } else {
-          const kept_diagnostics: InlineDiagnostic[] = [];
-
-          for (const diagnostic of diagnostics) {
-            let invalidated = false;
-
-            transaction.changes.iterChangedRanges((from_a, to_a) => {
-              if (invalidated) return;
-
-              const touches_diagnostic_region =
-                from_a <= diagnostic.to && to_a >= diagnostic.from;
-
-              if (touches_diagnostic_region) {
-                invalidated = true;
-              }
-            });
-
-            if (!invalidated) {
-              kept_diagnostics.push({
-                ...diagnostic,
-                from: transaction.changes.mapPos(diagnostic.from, 1),
-                to: transaction.changes.mapPos(diagnostic.to, 1),
-              });
-            }
-          }
-
-          diagnostics = kept_diagnostics;
-        }
       }
 
       for (const effect of transaction.effects) {
@@ -154,21 +117,25 @@
       import("@codemirror/theme-one-dark"),
     ]);
 
+    const extensions = [
+      basicSetup,
+      oneDark,
+      inline_diagnostics,
+      inline_diagnostic_decorations,
+      EditorView.theme({
+        "&": {
+          height: "100%",
+          fontSize: "14px",
+        },
+      }),
+      python(),
+    ];
+
+    const initial_state = (doc: string) =>
+      EditorState.create({ doc, extensions });
+
     const _view = new EditorView({
-      doc: app.buffer,
-      extensions: [
-        basicSetup,
-        oneDark,
-        inline_diagnostics,
-        inline_diagnostic_decorations,
-        EditorView.theme({
-          "&": {
-            height: "100%",
-            fontSize: "14px",
-          },
-        }),
-        python(),
-      ],
+      state: initial_state(app.buffer),
       parent: element,
 
       dispatchTransactions: (txs, editor_view) => {
@@ -179,22 +146,42 @@
 
     view = _view;
 
+    // Editor state and scroll position of each file at last switch to another file
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- map never read in an effect or template
+    const saved = new Map<
+      symbol,
+      { state: EditorState; scroll: StateEffect<unknown> }
+    >();
+
     app.register_editor({
-      set_doc: (data: string) => {
-        const transaction = _view.state.update({
-          changes: {
-            from: 0,
-            to: _view.state.doc.length,
-            insert: data,
-          },
+      open: (previous, file) => {
+        saved.set(previous.id, {
+          state: _view.state,
+          scroll: _view.scrollSnapshot(),
         });
 
-        _view.dispatch(transaction);
+        const restored = saved.get(file.id);
+
+        if (restored === undefined) {
+          _view.setState(initial_state(file.buffer));
+          _view.scrollDOM.scrollTo(0, 0);
+        } else {
+          if (restored.state.doc.toString() !== file.buffer) {
+            throw new Error(
+              `Saved editor state of “${file.path}” differs from buffer`,
+            );
+          }
+
+          _view.setState(restored.state);
+          _view.dispatch({ effects: restored.scroll });
+        }
+      },
+
+      close: (file) => {
+        saved.delete(file.id);
       },
 
       set_diagnostics: (diagnostics) => {
-        const active_file = app.current_file;
-
         const inline_diagnostics = diagnostics
           .filter(
             (
@@ -203,7 +190,6 @@
               line: number;
             } => diagnostic.line !== null,
           )
-          .filter((diagnostic) => diagnostic.file === active_file)
           .filter(
             (diagnostic) =>
               diagnostic.line >= 1 && diagnostic.line <= _view.state.doc.lines,
