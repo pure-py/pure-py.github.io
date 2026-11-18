@@ -12,7 +12,7 @@
   <meta
     name="description"
     content="{data.config
-      .name}: a pure, functional subset of Python for scientific computing. Formal specification and reference checker."
+      .name}: a pure functional subset of Python for scientific computing. Formal specification and reference implementation."
   />
 </svelte:head>
 
