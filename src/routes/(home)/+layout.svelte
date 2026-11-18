@@ -38,11 +38,5 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <p>© {data.config.name} contributors</p>
-    <nav>
-      {#if data.config.github}
-        <a href={data.config.github} target="_blank">GitHub</a>
-      {/if}
-      <a href={data.config.spec} target="_blank">Specification (PDF)</a>
-    </nav>
   </div>
 </footer>

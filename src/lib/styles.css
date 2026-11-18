@@ -237,15 +237,7 @@ section {
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 1.5rem 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 .footer-inner p {
   margin: 0;
-}
-.footer-inner nav {
-  display: flex;
-  gap: 1.25rem;
 }
