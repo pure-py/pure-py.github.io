@@ -147,7 +147,7 @@
     view = _view;
 
     // Editor state and scroll position of each file at last switch to another file
-    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- map never read in effect or template
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- map never read in an effect or template
     const saved = new Map<
       symbol,
       { state: EditorState; scroll: StateEffect<unknown> }
