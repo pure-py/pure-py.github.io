@@ -5,8 +5,7 @@ const metadata = import.meta.glob<string>(
   { query: "?raw", import: "default", eager: true },
 );
 
-// Check that the installed reference implementation has the pinned version
-export const check_installation = () => {
+export const check_pinned_version_installed = () => {
   const versions = Object.values(metadata).map(
     (file) => file.match(/^Version: (.*)$/m)?.[1],
   );
