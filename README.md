@@ -4,7 +4,7 @@ The PurePy project site, built with SvelteKit and `adapter-static` (deployed to 
 
 ## Development setup
 
-We recommend using `uv` to manage this repository's Python dependencies. The following command expects `uv` and will install all Node and Python dependencies:
+The site pins one version of the specification and reference implementation, in `.purepy-version`. With `uv` installed, the following command installs the Node dependencies, reference implementation and specification PDF:
 
 ```bash
 yarn setup
@@ -14,7 +14,8 @@ Or run the steps manually:
 
 ```bash
 yarn install
-uv pip install --target src/lib/python -r pyproject.toml
+./scripts/install-purepy.sh
+./scripts/download-spec.sh
 ```
 
 ## Development
