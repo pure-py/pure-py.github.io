@@ -22,7 +22,6 @@
   >
   <nav class="site-nav">
     <a href="/#overview">Overview</a>
-    <a href="/#features">Features</a>
     <a href={data.config.spec} target="_blank">Spec</a>
     {#if data.config.github}
       <a href={data.config.github} target="_blank">GitHub</a>
