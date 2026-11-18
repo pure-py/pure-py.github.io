@@ -154,6 +154,9 @@ section {
   color: var(--muted);
   max-width: 64ch;
 }
+.prose p + p {
+  margin-top: 0.75rem;
+}
 
 /* Code sample */
 .code-sample pre {
