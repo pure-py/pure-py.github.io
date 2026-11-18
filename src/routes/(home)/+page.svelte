@@ -70,8 +70,8 @@
   <p class="caption">
     The declaration <code>kind: str</code> is mandatory. Each later assignment
     to
-    <code>kind</code> is treated as a deferred initialisation, like an assignment
-    to a blank final variable in Java. Reassignment on the same branch is not permitted.
+    <code>kind</code> is then treated as a deferred initialisation, like an assignment
+    to a blank final variable in Java, so reassignment on the same branch is not permitted.
   </p>
 </section>
 
@@ -85,8 +85,8 @@
     <div class="card">
       <h3>Statically typed</h3>
       <p>
-        Type annotations are mandatory. The type system accepts only programs
-        which are well-typed under mypy.
+        Mandatory type annotations and a type system which accepts only programs
+        well-typed under mypy.
       </p>
     </div>
     <div class="card">
@@ -99,8 +99,8 @@
     <div class="card">
       <h3>Formally specified</h3>
       <p>
-        A grammar, well-formedness rules, and an operational semantics. The
-        rules and semantics are mechanised in Isabelle/HOL.
+        Well-formedness rules and operational semantics mechanised in
+        Isabelle/HOL, with proof of soundness.
       </p>
     </div>
     <div class="card">
@@ -119,13 +119,6 @@
     <div class="card">
       <h3>For science</h3>
       <p>Reproducible, deterministic, and easy to reason about.</p>
-    </div>
-    <div class="card">
-      <h3>Checkable</h3>
-      <p>
-        A reference implementation decides membership of the subset and flags
-        use of unassigned variables.
-      </p>
     </div>
   </div>
 </section>
