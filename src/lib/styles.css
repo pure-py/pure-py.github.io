@@ -170,6 +170,18 @@ section {
   line-height: 1.55;
   margin: 0;
 }
+.code-sample .caption {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-style: italic;
+  margin-top: 0.75rem;
+  max-width: 64ch;
+}
+.code-sample .caption code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  font-style: normal;
+}
 .code-sample .tok-kw {
   color: #c678dd;
 }

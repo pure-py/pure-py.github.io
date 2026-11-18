@@ -67,6 +67,12 @@
       >(<span class="tok-class">Point</span>(<span class="tok-num">3</span
       >, <span class="tok-num">4</span>)))</code
     ></pre>
+  <p class="caption">
+    The declaration <code>kind: str</code> is mandatory. Each later assignment
+    to
+    <code>kind</code> is treated as a deferred initialisation, like an assignment
+    to a blank final variable in Java. Reassignment on the same branch is not permitted.
+  </p>
 </section>
 
 <section id="features" class="features">
@@ -74,7 +80,7 @@
   <div class="grid">
     <div class="card">
       <h3>Pure &amp; functional</h3>
-      <p>Mutation-free. Functions are referentially transparent.</p>
+      <p>Mutation-free; functions are referentially transparent.</p>
     </div>
     <div class="card">
       <h3>Statically typed</h3>
