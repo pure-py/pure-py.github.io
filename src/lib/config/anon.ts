@@ -20,7 +20,7 @@ export const public_config = {
   version: PUREPY_VERSION,
   logo,
   github: "https://github.com/pure-py/pure-py-spec",
-  spec: "/PurePy-spec.pdf",
+  spec: `https://pure-py.github.io/pure-py-spec/v${PUREPY_VERSION}/PurePy-spec.pdf`,
   favicon: "/favicon.png",
   languages: [
     { name: "Fluid", url: "https://f.luid.org" },
