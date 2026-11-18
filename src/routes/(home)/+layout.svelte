@@ -12,17 +12,15 @@
   <meta
     name="description"
     content="{data.config
-      .name}: a pure, functional subset of Python for scientific computing. Formal specification and reference checker."
+      .name}: a pure functional subset of Python for scientific computing. Formal specification and reference implementation."
   />
 </svelte:head>
 
 <header class="site-header">
-  <a class="brand" href="#top"
-    ><img class="brand-logo" src={data.config.logo} alt={data.config.name} /></a
-  >
+  <h1 class="brand">
+    <img class="brand-logo" src={data.config.logo} alt={data.config.name} />
+  </h1>
   <nav class="site-nav">
-    <a href="/#overview">Overview</a>
-    <a href="/#features">Features</a>
     <a href={data.config.spec} target="_blank">Spec</a>
     {#if data.config.github}
       <a href={data.config.github} target="_blank">GitHub</a>
@@ -37,12 +35,6 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <p>© {data.config.name} contributors</p>
-    <nav>
-      {#if data.config.github}
-        <a href={data.config.github} target="_blank">GitHub</a>
-      {/if}
-      <a href={data.config.spec} target="_blank">Specification (PDF)</a>
-    </nav>
+    <p>© 2026 {data.config.name} contributors</p>
   </div>
 </footer>

@@ -52,20 +52,16 @@ a:hover {
   gap: 1rem;
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 1.1rem 1.25rem;
+  padding: 2rem 1.25rem 0;
   flex-wrap: wrap;
 }
 .brand {
-  display: inline-flex;
-  align-items: center;
-}
-.brand:hover {
-  text-decoration: none;
+  margin: 0;
+  line-height: 0;
 }
 .brand-logo {
-  height: 26px;
+  height: clamp(60px, 12vw, 100px);
   width: auto;
-  display: block;
 }
 .site-nav {
   display: flex;
@@ -86,22 +82,13 @@ a:hover {
 section {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 2rem 1.25rem;
+  padding: 1.25rem;
 }
 
 /* Hero */
 .hero {
   text-align: left;
-  padding-top: 4rem;
-  padding-bottom: 3rem;
-}
-.hero h1 {
-  margin: 0 0 1.25rem;
-  line-height: 0;
-}
-.hero-logo {
-  height: clamp(60px, 12vw, 100px);
-  width: auto;
+  padding-bottom: 1.75rem;
 }
 .hero .tagline {
   font-size: clamp(1.1rem, 3vw, 1.5rem);
@@ -154,6 +141,9 @@ section {
   color: var(--muted);
   max-width: 64ch;
 }
+.prose p + p {
+  margin-top: 0.75rem;
+}
 
 /* Code sample */
 .code-sample pre {
@@ -166,6 +156,18 @@ section {
   font-size: 0.9rem;
   line-height: 1.55;
   margin: 0;
+}
+.code-sample figcaption {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.5;
+  margin-top: 0.6rem;
+}
+.code-sample figcaption code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  font-style: normal;
 }
 .code-sample .tok-kw {
   color: #c678dd;
@@ -214,7 +216,7 @@ section {
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--border);
-  margin-top: 3rem;
+  margin-top: 1.75rem;
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -222,15 +224,7 @@ section {
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 1.5rem 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 .footer-inner p {
   margin: 0;
-}
-.footer-inner nav {
-  display: flex;
-  gap: 1.25rem;
 }

@@ -24,8 +24,8 @@ runs:
       run: yarn install --immutable
       shell: bash
 
-    - name: Install Python dependencies
-      run: uv pip install --target src/lib/python -r pyproject.toml
+    - name: Install reference implementation
+      run: ./scripts/install-purepy.sh
       shell: bash
 
     - name: Lint
