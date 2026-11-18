@@ -82,8 +82,8 @@
     <div class="card">
       <h3>Pure &amp; functional</h3>
       <p>
-        Mutation-free, with referentially transparent functions and static
-        resolution of all variables.
+        Mutation-free; functions are referentially transparent. All variable
+        resolution is static.
       </p>
     </div>
     <div class="card">
