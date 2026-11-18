@@ -121,13 +121,14 @@
     <Tabs {app} />
   </div>
 
+  {const height = editor_height === 0 ? "100%" : `${editor_height}px`}
   <!-- Editor (editor_height) -->
-  <div style="height: {editor_height}px">
+  <div style="height: {height}">
     <CodeMirror bind:this={editor} {app} />
   </div>
 
   <!-- Status Bar + Terminal (terminal_height) -->
-  <div class="flex flex-col" style="height: {terminal_height}px">
+  <div class="flex flex-col shrink-0" style="height: {terminal_height}px">
     <!-- Status Bar (STATUS_BAR_HEIGHT) -->
     <TerminalDragger {adjust_height} />
     <StatusBar
