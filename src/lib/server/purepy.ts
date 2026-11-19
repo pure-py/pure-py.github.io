@@ -10,22 +10,19 @@ const suite = import.meta.glob<string>(
   { query: "?raw", import: "default", eager: true },
 );
 
-// Installed version of a distribution
-const installed_version = (
-  distribution: string,
-  metadata: Record<string, string>,
-) => {
-  const versions = Object.values(metadata).map(
+// Installed version of a package
+const installed_version = (name: string, metadata: Record<string, string>) => {
+  const [version, ...rest] = Object.values(metadata).map(
     (file) => file.match(/^Version: (.*)$/m)?.[1],
   );
 
-  if (versions.length !== 1 || versions[0] === undefined) {
+  if (version === undefined || rest.length > 0) {
     throw new Error(
-      `Distribution ${distribution} installed ${versions.length} times`,
+      `Expected one installed version of package ${name}, found ${Object.keys(metadata).length}`,
     );
   }
 
-  return versions[0];
+  return version;
 };
 
 // Specification version of the installed reference implementation
