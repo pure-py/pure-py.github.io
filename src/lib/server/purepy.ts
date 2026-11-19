@@ -12,14 +12,10 @@ const suite = import.meta.glob<string>(
 
 // Installed version of a package
 const installed_version = (name: string, metadata: Record<string, string>) => {
-  const [version, ...rest] = Object.values(metadata).map(
-    (file) => file.match(/^Version: (.*)$/m)?.[1],
-  );
+  const version = Object.values(metadata)[0]?.match(/^Version: (.*)$/m)?.[1];
 
-  if (version === undefined || rest.length > 0) {
-    throw new Error(
-      `Expected one installed version of package ${name}, found ${Object.keys(metadata).length}`,
-    );
+  if (version === undefined) {
+    throw new Error(`Package ${name} not installed`);
   }
 
   return version;
