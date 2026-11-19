@@ -1,0 +1,6 @@
+[tool.basedpyright]
+executionEnvironments = [
+    { root = "src/lib/python", pythonVersion = "3.12", extraPaths = [
+        "src/vendor/python",
+    ] },
+]
