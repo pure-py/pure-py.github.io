@@ -1,5 +1,5 @@
 const suite = import.meta.glob<string>(
-  "../python/purepy_conformance-*.dist-info/METADATA",
+  "./purepy_conformance-*.dist-info/METADATA",
   { query: "?raw", import: "default", eager: true, base: "/src/vendor/python" },
 );
 
