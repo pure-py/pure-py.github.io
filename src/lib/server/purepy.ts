@@ -1,18 +1,13 @@
-import { PUREPY_VERSION } from "#lib/playground/lib/purepy/version.js";
-
-const metadata = import.meta.glob<string>(
-  "../python/purepy-*.dist-info/METADATA",
+const suite = import.meta.glob<string>(
+  "../python/purepy_conformance-*.dist-info/METADATA",
   { query: "?raw", import: "default", eager: true },
 );
 
-export const check_pinned_version_installed = () => {
-  const versions = Object.values(metadata).map(
-    (file) => file.match(/^Version: (.*)$/m)?.[1],
-  );
+const version = Object.values(suite)[0]?.match(/^Version: (.*)$/m)?.[1];
 
-  if (versions.length !== 1 || versions[0] !== PUREPY_VERSION) {
-    throw new Error(
-      `Installed reference implementation [${versions.join(", ")}] differs from pinned version ${PUREPY_VERSION}`,
-    );
-  }
-};
+if (version === undefined) {
+  throw new Error("Conformance suite not installed");
+}
+
+// Specification version of the installed reference implementation
+export const SPEC_VERSION = version;

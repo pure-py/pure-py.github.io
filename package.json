@@ -5,16 +5,15 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "dev:anonymous": "ANONYMOUS=true vite dev",
-    "build": "vite build",
-    "build:anonymous": "ANONYMOUS=true vite build",
+    "dev": "./scripts/install-purepy.sh && vite dev",
+    "dev:anonymous": "./scripts/install-purepy.sh && ANONYMOUS=true vite dev",
+    "build": "./scripts/install-purepy.sh && vite build",
+    "build:anonymous": "./scripts/install-purepy.sh && ANONYMOUS=true vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "lint": "prettier --check . && eslint .",
-    "format": "prettier --write .",
-    "setup": "yarn install && ./scripts/install-purepy.sh"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@codemirror/lang-python": "^6.2.1",

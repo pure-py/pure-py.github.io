@@ -1,9 +1,9 @@
 import logo from "#lib/assets/image/logo.png";
-import { PUREPY_VERSION } from "#lib/playground/lib/purepy/version.js";
+import { SPEC_VERSION } from "#lib/server/purepy.js";
 
 export type SiteConfig = {
   name: string;
-  // Pinned version of specification and reference implementation
+  // Specification version of the reference implementation
   version: string;
   logo: string;
   github: string | null;
@@ -17,10 +17,10 @@ const NO_LOGO =
 
 export const public_config = {
   name: "PurePy",
-  version: PUREPY_VERSION,
+  version: SPEC_VERSION,
   logo,
   github: "https://github.com/pure-py/pure-py-spec",
-  spec: `https://pure-py.github.io/pure-py-spec/v${PUREPY_VERSION}/PurePy-spec.pdf`,
+  spec: `https://pure-py.github.io/pure-py-spec/v${SPEC_VERSION}/PurePy-spec.pdf`,
   favicon: "/favicon.png",
   languages: [
     { name: "Fluid", url: "https://f.luid.org" },
@@ -66,7 +66,7 @@ const anonymised = (macro: string) => {
 
 export const anon_config = (): SiteConfig => ({
   name: spec_file("anon-name").trim(),
-  version: PUREPY_VERSION,
+  version: SPEC_VERSION,
   logo: NO_LOGO,
   github: null,
   spec: "/spec-anon.pdf",
