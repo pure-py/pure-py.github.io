@@ -4,7 +4,7 @@ The PurePy project site, built with SvelteKit and `adapter-static` (deployed to 
 
 ## Development setup
 
-The site pins one version of the reference implementation and specification in `.purepy-version`. The `dev` and `build` commands use `uv` to install the reference implementation before starting, so setup needs only the Node dependencies:
+The site pins the PurePy version in `.purepy-version`. The `dev` and `build` commands use `uv` to install the reference implementation before starting, so setup needs only the Node dependencies:
 
 ```bash
 yarn install
