@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Download anonymised specification files; fails after 0.27.10, since later versions don't publish them
+# Download anonymised specification files; fails after 0.27.10, since later versions lack the files
 version=$(grep -oE '^[0-9]+\.[0-9]+\.[0-9]+' .purepy-version)
 sources="https://raw.githubusercontent.com/pure-py/pure-py-spec/v$version"
 
