@@ -4,7 +4,7 @@
 
   // Major and minor version of the specification
   const version = $derived(
-    data.config.version.split(".").slice(0, 2).join("."),
+    data.config.spec_version.split(".").slice(0, 2).join("."),
   );
 </script>
 
