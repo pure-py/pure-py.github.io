@@ -2,8 +2,6 @@
 set -euo pipefail
 
 # Download anonymised specification files; not published after 0.27.10
-
-# Specification version of the pinned reference implementation
 version=$(grep -oE '^[0-9]+\.[0-9]+\.[0-9]+' .purepy-version)
 sources="https://raw.githubusercontent.com/pure-py/pure-py-spec/v$version"
 

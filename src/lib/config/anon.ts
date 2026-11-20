@@ -3,7 +3,7 @@ import { SPEC_VERSION } from "#lib/playground/lib/purepy/version.js";
 
 export type SiteConfig = {
   name: string;
-  // Specification version of the reference implementation
+  // Specification version
   version: string;
   logo: string;
   github: string | null;
