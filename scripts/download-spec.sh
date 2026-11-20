@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Download anonymised specification and files defining anonymised names of project and related languages
 
-# Specification version of the installed reference implementation
-version=$(sed -n 's/^Version: //p' src/lib/python/purepy_conformance-*.dist-info/METADATA)
+# Specification version of the pinned reference implementation
+version=$(grep -oE '^[0-9]+\.[0-9]+\.[0-9]+' .purepy-version)
 sources="https://raw.githubusercontent.com/pure-py/pure-py-spec/v$version"
 
 curl -fL "https://pure-py.github.io/pure-py-spec/v$version/spec-anon.pdf" -o static/spec-anon.pdf

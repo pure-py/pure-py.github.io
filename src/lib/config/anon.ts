@@ -1,5 +1,5 @@
 import logo from "#lib/assets/image/logo.png";
-import { SPEC_VERSION } from "#lib/server/purepy.js";
+import { SPEC_VERSION } from "#lib/playground/lib/purepy/version.js";
 
 export type SiteConfig = {
   name: string;
