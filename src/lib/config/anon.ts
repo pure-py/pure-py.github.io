@@ -1,10 +1,9 @@
 import logo from "#lib/assets/image/logo.png";
-import { SPEC_VERSION } from "#lib/server/purepy.js";
+import { SPEC_VERSION } from "#lib/playground/lib/purepy/version.js";
 
 export type SiteConfig = {
   name: string;
-  // Specification version of the reference implementation
-  version: string;
+  spec_version: string;
   logo: string;
   github: string | null;
   spec: string;
@@ -17,7 +16,7 @@ const NO_LOGO =
 
 export const public_config = {
   name: "PurePy",
-  version: SPEC_VERSION,
+  spec_version: SPEC_VERSION,
   logo,
   github: "https://github.com/pure-py/pure-py-spec",
   spec: `https://pure-py.github.io/pure-py-spec/v${SPEC_VERSION}/PurePy-spec.pdf`,
@@ -66,7 +65,7 @@ const anonymised = (macro: string) => {
 
 export const anon_config = (): SiteConfig => ({
   name: spec_file("anon-name").trim(),
-  version: SPEC_VERSION,
+  spec_version: SPEC_VERSION,
   logo: NO_LOGO,
   github: null,
   spec: "/spec-anon.pdf",
